@@ -79,14 +79,6 @@ const GuitarFactoryDashboard = () => {
         {showInstructions && (
           <>
             <div className="intro-section">
-              <h2>How It Works</h2>
-              <p>
-                You're in charge of a guitar manufacturing facility. Your goal is to maximize profits 
-                by optimizing the production line while managing labor and material costs.
-              </p>
-            </div>
-
-            <div className="intro-section">
               <h2>Production Process</h2>
               <div className="process-grid">
                 <div className="process-step">
@@ -313,6 +305,16 @@ const GuitarFactoryDashboard = () => {
           margin-bottom: 20px;
         }
         
+        .toggle-button {
+          margin: 10px 0;
+          padding: 8px 16px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        
         .intro-section {
           margin: 20px 0;
           padding: 15px;
@@ -462,22 +464,41 @@ const GuitarFactoryDashboard = () => {
           font-size: 1.2em;
           margin: 4px 0;
         }
-        
-        .toggle-button {
-          width: 100%;
-          padding: 12px;
-          margin: 10px 0;
-          background: #3b82f6;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 1.1em;
-          transition: background-color 0.2s;
+
+        .process-diagram {
+          margin: 20px 0;
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          overflow-x: auto;
         }
 
-        .toggle-button:hover {
-          background: #2563eb;
+        .process-diagram svg {
+          max-width: 100%;
+        }
+
+        .process-diagram .box {
+          fill: white;
+          stroke: #2563eb;
+          stroke-width: 2;
+        }
+
+        .process-diagram .triangle {
+          fill: white;
+          stroke: #2563eb;
+          stroke-width: 2;
+        }
+
+        .process-diagram .label {
+          text-anchor: middle;
+          font-size: 12px;
+          fill: #1f2937;
+        }
+
+        .process-diagram .arrows line {
+          stroke: #2563eb;
+          stroke-width: 2;
         }
       `}</style>
     </div>
