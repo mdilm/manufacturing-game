@@ -44,7 +44,8 @@ const GuitarFactoryDashboard = () => {
           { name: 'Body Post-Paint', units: data.final_state.body_post_paint },
           { name: 'Neck Post-Paint', units: data.final_state.neck_post_paint },
           { name: 'Ready for Dispatch', units: data.final_state.dispatch },
-        ]
+        ],
+        financial_results: data.financial_results
       });
     } catch (error) {
       console.error('Simulation failed:', error);
@@ -154,6 +155,30 @@ const GuitarFactoryDashboard = () => {
             <p>Total Guitars Produced: {results.totalGuitars}</p>
           </div>
 
+          <div className="financial-results">
+            <h3>Financial Summary</h3>
+            <div className="financial-grid">
+              <div>
+                <label>Total Revenue:</label>
+                <p>${results.financial_results.total_revenue.toLocaleString()}</p>
+              </div>
+              <div>
+                <label>Labor Costs:</label>
+                <p>${results.financial_results.labor_costs.toLocaleString()}</p>
+              </div>
+              <div>
+                <label>Material Costs:</label>
+                <p>${results.financial_results.material_costs.toLocaleString()}</p>
+              </div>
+              <div>
+                <label>Net Profit:</label>
+                <p style={{color: results.financial_results.profit >= 0 ? 'green' : 'red'}}>
+                  ${results.financial_results.profit.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="chart">
             <BarChart
               width={800}
@@ -238,6 +263,25 @@ const GuitarFactoryDashboard = () => {
         .log-entry {
           margin-bottom: 4px;
           font-size: 14px;
+        }
+        .financial-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          margin: 16px 0;
+          padding: 16px;
+          background: #f8f9fa;
+          border-radius: 8px;
+        }
+        
+        .financial-grid label {
+          font-weight: bold;
+          color: #666;
+        }
+        
+        .financial-grid p {
+          font-size: 1.2em;
+          margin: 4px 0;
         }
       `}</style>
     </div>
