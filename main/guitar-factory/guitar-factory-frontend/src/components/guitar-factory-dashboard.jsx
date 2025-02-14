@@ -17,7 +17,7 @@ const GuitarFactoryDashboard = () => {
   const runSimulation = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/simulate', {
+      const response = await fetch('https://manufacturing-game.onrender.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
