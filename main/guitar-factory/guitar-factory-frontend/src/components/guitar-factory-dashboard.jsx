@@ -13,6 +13,7 @@ const GuitarFactoryDashboard = () => {
 
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const runSimulation = async () => {
     setLoading(true);
@@ -68,80 +69,91 @@ const GuitarFactoryDashboard = () => {
       <div className="introduction">
         <h1>Guitar Factory Simulation</h1>
         
-        <div className="intro-section">
-          <h2>How It Works</h2>
-          <p>
-            You're in charge of a guitar manufacturing facility. Your goal is to maximize profits 
-            by optimizing the production line while managing labor and material costs.
-          </p>
-        </div>
+        <button 
+          className="toggle-button"
+          onClick={() => setShowInstructions(!showInstructions)}
+        >
+          {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+        </button>
 
-        <div className="intro-section">
-          <h2>Production Process</h2>
-          <div className="process-grid">
-            <div className="process-step">
-              <h3>1. Body Making</h3>
-              <p>Takes 1 hour</p>
-              <p>Uses 2 wood units</p>
-              <p>Worker wage: $25/hour</p>
+        {showInstructions && (
+          <>
+            <div className="intro-section">
+              <h2>How It Works</h2>
+              <p>
+                You're in charge of a guitar manufacturing facility. Your goal is to maximize profits 
+                by optimizing the production line while managing labor and material costs.
+              </p>
             </div>
-            <div className="process-step">
-              <h3>2. Neck Making</h3>
-              <p>Takes 1 hour</p>
-              <p>Uses 1 wood unit</p>
-              <p>Worker wage: $25/hour</p>
-            </div>
-            <div className="process-step">
-              <h3>3. Painting</h3>
-              <p>Takes 2 hours</p>
-              <p>Paints both body and neck</p>
-              <p>Worker wage: $30/hour</p>
-            </div>
-            <div className="process-step">
-              <h3>4. Assembly</h3>
-              <p>Takes 1 hour</p>
-              <p>Uses 1 electronic unit</p>
-              <p>Worker wage: $28/hour</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="intro-section">
-          <h2>Costs & Revenue</h2>
-          <div className="costs-grid">
-            <div className="cost-item">
-              <h3>Materials</h3>
-              <ul>
-                <li>Wood: $50 per unit</li>
-                <li>Electronics: $100 per unit</li>
+            <div className="intro-section">
+              <h2>Production Process</h2>
+              <div className="process-grid">
+                <div className="process-step">
+                  <h3>1. Body Making</h3>
+                  <p>Takes 1 hour</p>
+                  <p>Uses 2 wood units</p>
+                  <p>Worker wage: $25/hour</p>
+                </div>
+                <div className="process-step">
+                  <h3>2. Neck Making</h3>
+                  <p>Takes 1 hour</p>
+                  <p>Uses 1 wood unit</p>
+                  <p>Worker wage: $25/hour</p>
+                </div>
+                <div className="process-step">
+                  <h3>3. Painting</h3>
+                  <p>Takes 2 hours</p>
+                  <p>Paints both body and neck</p>
+                  <p>Worker wage: $30/hour</p>
+                </div>
+                <div className="process-step">
+                  <h3>4. Assembly</h3>
+                  <p>Takes 1 hour</p>
+                  <p>Uses 1 electronic unit</p>
+                  <p>Worker wage: $28/hour</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="intro-section">
+              <h2>Costs & Revenue</h2>
+              <div className="costs-grid">
+                <div className="cost-item">
+                  <h3>Materials</h3>
+                  <ul>
+                    <li>Wood: $50 per unit</li>
+                    <li>Electronics: $100 per unit</li>
+                  </ul>
+                </div>
+                <div className="cost-item">
+                  <h3>Labor</h3>
+                  <ul>
+                    <li>Regular hours: Listed hourly rate</li>
+                    <li>Overtime ({'>'}40hrs/week): 1.5× regular rate</li>
+                  </ul>
+                </div>
+                <div className="cost-item">
+                  <h3>Revenue</h3>
+                  <ul>
+                    <li>Each guitar sells for: $1,000</li>
+                    <li>Guitars are picked up in batches of 50</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="intro-section">
+              <h2>Strategy Tips</h2>
+              <ul className="tips-list">
+                <li>Balance worker numbers to avoid bottlenecks</li>
+                <li>Consider overtime costs vs hiring more workers</li>
+                <li>Monitor material usage and storage levels</li>
+                <li>Watch for production bottlenecks in the logs</li>
               </ul>
             </div>
-            <div className="cost-item">
-              <h3>Labor</h3>
-              <ul>
-                <li>Regular hours: Listed hourly rate</li>
-                <li>Overtime ({'>'}40hrs/week): 1.5× regular rate</li>
-              </ul>
-            </div>
-            <div className="cost-item">
-              <h3>Revenue</h3>
-              <ul>
-                <li>Each guitar sells for: $1,000</li>
-                <li>Guitars are picked up in batches of 50</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="intro-section">
-          <h2>Strategy Tips</h2>
-          <ul className="tips-list">
-            <li>Balance worker numbers to avoid bottlenecks</li>
-            <li>Consider overtime costs vs hiring more workers</li>
-            <li>Monitor material usage and storage levels</li>
-            <li>Watch for production bottlenecks in the logs</li>
-          </ul>
-        </div>
+          </>
+        )}
       </div>
 
       <div className="controls">
@@ -449,6 +461,23 @@ const GuitarFactoryDashboard = () => {
         .financial-grid p {
           font-size: 1.2em;
           margin: 4px 0;
+        }
+        
+        .toggle-button {
+          width: 100%;
+          padding: 12px;
+          margin: 10px 0;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1.1em;
+          transition: background-color 0.2s;
+        }
+
+        .toggle-button:hover {
+          background: #2563eb;
         }
       `}</style>
     </div>
