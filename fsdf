@@ -1,0 +1,123 @@
+[33mcommit 401a47889d92fbbfb43924bad7300da08d65b190[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: bbacfa8 fb20aa7
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:46:41 2025 -0500
+
+    Merge pull request #13 from mdilm/remove-diagram
+    
+    remove diagram
+
+[33mcommit bbacfa8b02c8c89d1366b11e69d1eb4726f9c2d7[m
+Merge: e619342 bfbc851
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:43:18 2025 -0500
+
+    Merge pull request #12 from mdilm/fix-diagram
+    
+    fix diagram
+
+[33mcommit e619342ace6be86f7cfa250ac779e0ce0c7274e9[m
+Merge: d3d6534 edcc70a
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:38:31 2025 -0500
+
+    Merge pull request #11 from mdilm/flowmap-again
+    
+    get that flowmap in
+
+[33mcommit d3d6534053fabf3816d714d6198986657c6c8d74[m
+Merge: b258800 efe09ba
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:25:34 2025 -0500
+
+    Merge pull request #10 from mdilm/add-diagram-v2
+    
+    add diagram again
+
+[33mcommit b2588003c5c7d18fce164f7ef7ab1aa77a7dde31[m
+Merge: e4ab299 f27ec64
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:22:21 2025 -0500
+
+    Resolve merge conflict, keep new changes
+
+[33mcommit f27ec644181cc699040e1b99247fec9fe74a4696[m
+Merge: f593975 03ed869
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:16:37 2025 -0500
+
+    Merge pull request #9 from mdilm/add-diagram
+    
+    add diagram
+
+[33mcommit f593975123d4238081700265ca1c99324afb4ab1[m
+Merge: 56600b2 bd59b91
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 14:07:30 2025 -0500
+
+    Merge pull request #8 from mdilm/add-rules-description
+    
+    add instructions
+
+[33mcommit 56600b258dbe61dadae390be14a979ae9e440961[m
+Merge: 7fb4838 8474a5f
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 13:49:54 2025 -0500
+
+    Merge pull request #7 from mdilm/add-money
+    
+    Add monetary factor
+
+[33mcommit 7fb4838b4a254f036c42489ca923e0c51efc9bd0[m
+Merge: 237f633 cf980e0
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 11:04:12 2025 -0500
+
+    Merge pull request #6 from mdilm/more-url-probs
+    
+    fix url issues
+
+[33mcommit 237f633e874518aab0d7cea44c64ab5958c458d6[m
+Merge: d89d529 4257e0e
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 10:59:04 2025 -0500
+
+    Merge pull request #5 from mdilm/fix-url
+    
+    fix url
+
+[33mcommit d89d529af06b6810c1b39a1b629d5f0ac482ba78[m
+Merge: 5943676 62c0516
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 10:51:14 2025 -0500
+
+    Merge pull request #4 from mdilm/add-webservice-to-frontend
+    
+    add reference to web service
+
+[33mcommit 5943676c752eb3758e09711a1056ffee7740b6c4[m
+Merge: 616715e 14cbf93
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 10:46:52 2025 -0500
+
+    Merge pull request #3 from mdilm/secure-api
+    
+    adding some api security
+
+[33mcommit 616715ecbf894ca18e960bcebc3018ef1e05e170[m
+Merge: f7afae8 8010741
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 10:33:20 2025 -0500
+
+    Merge pull request #2 from mdilm/fix-frontend
+    
+    fix homepage url
+
+[33mcommit f7afae8a79ac38b4420044cc9d11b6688f481223[m
+Merge: 637cfc7 904e3f9
+Author: mdilm <93731990+mdilm@users.noreply.github.com>
+Date:   Fri Feb 14 10:25:37 2025 -0500
+
+    Merge pull request #1 from mdilm/build-game-engine
+    
+    Initial commit
