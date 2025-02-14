@@ -65,9 +65,87 @@ const GuitarFactoryDashboard = () => {
 
   return (
     <div className="container">
-      <div className="controls">
+      <div className="introduction">
         <h1>Guitar Factory Simulation</h1>
         
+        <div className="intro-section">
+          <h2>How It Works</h2>
+          <p>
+            You're in charge of a guitar manufacturing facility. Your goal is to maximize profits 
+            by optimizing the production line while managing labor and material costs.
+          </p>
+        </div>
+
+        <div className="intro-section">
+          <h2>Production Process</h2>
+          <div className="process-grid">
+            <div className="process-step">
+              <h3>1. Body Making</h3>
+              <p>Takes 1 hour</p>
+              <p>Uses 2 wood units</p>
+              <p>Worker wage: $25/hour</p>
+            </div>
+            <div className="process-step">
+              <h3>2. Neck Making</h3>
+              <p>Takes 1 hour</p>
+              <p>Uses 1 wood unit</p>
+              <p>Worker wage: $25/hour</p>
+            </div>
+            <div className="process-step">
+              <h3>3. Painting</h3>
+              <p>Takes 2 hours</p>
+              <p>Paints both body and neck</p>
+              <p>Worker wage: $30/hour</p>
+            </div>
+            <div className="process-step">
+              <h3>4. Assembly</h3>
+              <p>Takes 1 hour</p>
+              <p>Uses 1 electronic unit</p>
+              <p>Worker wage: $28/hour</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="intro-section">
+          <h2>Costs & Revenue</h2>
+          <div className="costs-grid">
+            <div className="cost-item">
+              <h3>Materials</h3>
+              <ul>
+                <li>Wood: $50 per unit</li>
+                <li>Electronics: $100 per unit</li>
+              </ul>
+            </div>
+            <div className="cost-item">
+              <h3>Labor</h3>
+              <ul>
+                <li>Regular hours: Listed hourly rate</li>
+                <li>Overtime ({'>'}40hrs/week): 1.5× regular rate</li>
+              </ul>
+            </div>
+            <div className="cost-item">
+              <h3>Revenue</h3>
+              <ul>
+                <li>Each guitar sells for: $1,000</li>
+                <li>Guitars are picked up in batches of 50</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="intro-section">
+          <h2>Strategy Tips</h2>
+          <ul className="tips-list">
+            <li>Balance worker numbers to avoid bottlenecks</li>
+            <li>Consider overtime costs vs hiring more workers</li>
+            <li>Monitor material usage and storage levels</li>
+            <li>Watch for production bottlenecks in the logs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="controls">
+        <h2>Simulation Controls</h2>
         <div className="input-group">
           <h3>Time Parameters</h3>
           <div>
@@ -214,6 +292,95 @@ const GuitarFactoryDashboard = () => {
           margin: 0 auto;
           padding: 20px;
         }
+        
+        .introduction {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          margin-bottom: 20px;
+        }
+        
+        .intro-section {
+          margin: 20px 0;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 6px;
+        }
+        
+        .process-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 20px;
+          margin-top: 15px;
+        }
+        
+        .process-step {
+          background: white;
+          padding: 15px;
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .process-step h3 {
+          color: #2563eb;
+          margin-bottom: 10px;
+        }
+        
+        .costs-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin-top: 15px;
+        }
+        
+        .cost-item {
+          background: white;
+          padding: 15px;
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cost-item h3 {
+          color: #2563eb;
+          margin-bottom: 10px;
+        }
+        
+        .cost-item ul {
+          list-style-type: none;
+          padding: 0;
+        }
+        
+        .cost-item li {
+          margin: 8px 0;
+          padding-left: 20px;
+          position: relative;
+        }
+        
+        .cost-item li:before {
+          content: "•";
+          position: absolute;
+          left: 0;
+          color: #2563eb;
+        }
+        
+        .tips-list {
+          list-style-type: none;
+          padding: 0;
+        }
+        
+        .tips-list li {
+          margin: 10px 0;
+          padding-left: 24px;
+          position: relative;
+        }
+        
+        .tips-list li:before {
+          content: "💡";
+          position: absolute;
+          left: 0;
+        }
+        
         .controls {
           background: white;
           padding: 20px;
