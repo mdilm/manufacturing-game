@@ -8,6 +8,7 @@ class SimulationResult:
     guitars_made: int
     logs: List[str]
     final_state: Dict
+    financial_results: Dict
 
 class Guitar_Factory:
     def __init__(self, env, params):
@@ -23,6 +24,28 @@ class Guitar_Factory:
         self.neck_post_paint = simpy.Container(env, capacity=params['neck_post_paint_capacity'], init=0)
         self.dispatch = simpy.Container(env, capacity=params['dispatch_capacity'], init=0)
         self.dispatch_control = env.process(self.dispatch_guitars_control(env))
+        
+        # Add financial parameters
+        self.finances = {
+            'total_revenue': 0,
+            'labor_costs': 0,
+            'material_costs': 0,
+            'profit': 0
+        }
+        
+        # Costs and prices
+        self.costs = {
+            'wood_per_unit': 50,  # $50 per wood unit
+            'electronic_per_unit': 100,  # $100 per electronic unit
+            'guitar_sale_price': 1000,  # $1000 per guitar
+            'hourly_wages': {
+                'body_maker': 25,
+                'neck_maker': 25,
+                'painter': 30,
+                'assembler': 28
+            },
+            'overtime_multiplier': 1.5  # 1.5x pay for overtime
+        }
 
     def log(self, message):
         self.logs.append(message)
@@ -63,14 +86,31 @@ class Guitar_Factory:
             else:
                 yield env.timeout(1)
                 
+    def calculate_worker_pay(self, hours_worked, role):
+        base_rate = self.costs['hourly_wages'][role]
+        regular_hours = min(40, hours_worked)
+        overtime_hours = max(0, hours_worked - 40)
+        
+        regular_pay = regular_hours * base_rate
+        overtime_pay = overtime_hours * base_rate * self.costs['overtime_multiplier']
+        
+        return regular_pay + overtime_pay
+
     def dispatch_guitars_control(self, env):
         yield env.timeout(0)
         while True:
             if self.dispatch.level >= 50:
-                self.log(f'dispach stock is {self.dispatch.level}, calling store to pick guitars at day {int(env.now/8)}, hour {env.now % 8}')
+                self.log(f'dispatch stock is {self.dispatch.level}, calling store to pick guitars at day {int(env.now/8)}, hour {env.now % 8}')
                 self.log('----------------------------------')
                 yield env.timeout(4)
                 self.log(f'store picking {self.dispatch.level} guitars at day {int(env.now/8)}, hour {env.now % 8}')
+                
+                # Calculate revenue from guitars
+                guitars_sold = self.dispatch.level
+                revenue = guitars_sold * self.costs['guitar_sale_price']
+                self.finances['total_revenue'] += revenue
+                self.log(f'Revenue from sale: ${revenue:,.2f}')
+                
                 self.guitars_made += self.dispatch.level
                 yield self.dispatch.get(self.dispatch.level)
                 self.log('----------------------------------')
@@ -181,10 +221,33 @@ class GuitarFactorySimulation:
             'total_guitars': self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level
         }
 
+        # Calculate final financial results
+        weekly_hours = self.hours * 5  # Assuming 5-day work week
+        total_weeks = self.days / 5
+
+        # Calculate labor costs
+        labor_costs = 0
+        labor_costs += self.num_body * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'body_maker')
+        labor_costs += self.num_neck * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'neck_maker')
+        labor_costs += self.num_paint * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'painter')
+        labor_costs += self.num_ensam * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'assembler')
+
+        # Calculate material costs
+        wood_used = (self.guitar_factory.guitars_made * 3)  # 2 for body + 1 for neck
+        electronics_used = self.guitar_factory.guitars_made
+        material_costs = (wood_used * self.guitar_factory.costs['wood_per_unit'] +
+                        electronics_used * self.guitar_factory.costs['electronic_per_unit'])
+
+        self.guitar_factory.finances['labor_costs'] = labor_costs
+        self.guitar_factory.finances['material_costs'] = material_costs
+        self.guitar_factory.finances['profit'] = (self.guitar_factory.finances['total_revenue'] - 
+                                                labor_costs - material_costs)
+
         return SimulationResult(
             guitars_made=self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level,
             logs=self.guitar_factory.logs,
-            final_state=final_state
+            final_state=final_state,
+            financial_results=self.guitar_factory.finances
         )
 
 def run_factory_simulation(params: dict) -> SimulationResult:
