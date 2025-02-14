@@ -289,6 +289,190 @@ const GuitarFactoryDashboard = () => {
           </div>
         </div>
       )}
+      <style jsx>{`
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        
+        .introduction {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          margin-bottom: 20px;
+        }
+        
+        .toggle-button {
+          margin: 10px 0;
+          padding: 8px 16px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        
+        .intro-section {
+          margin: 20px 0;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 6px;
+        }
+        
+        .process-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 20px;
+          margin-top: 15px;
+        }
+        
+        .process-step {
+          background: white;
+          padding: 15px;
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .process-step h3 {
+          color: #2563eb;
+          margin-bottom: 10px;
+        }
+        
+        .costs-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin-top: 15px;
+        }
+        
+        .cost-item {
+          background: white;
+          padding: 15px;
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cost-item h3 {
+          color: #2563eb;
+          margin-bottom: 10px;
+        }
+        
+        .cost-item ul {
+          list-style-type: none;
+          padding: 0;
+        }
+        
+        .cost-item li {
+          margin: 8px 0;
+          padding-left: 20px;
+          position: relative;
+        }
+        
+        .cost-item li:before {
+          content: "•";
+          position: absolute;
+          left: 0;
+          color: #2563eb;
+        }
+        
+        .tips-list {
+          list-style-type: none;
+          padding: 0;
+        }
+        
+        .tips-list li {
+          margin: 10px 0;
+          padding-left: 24px;
+          position: relative;
+        }
+        
+        .tips-list li:before {
+          content: "💡";
+          position: absolute;
+          left: 0;
+        }
+        
+        .controls {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+          margin-bottom: 20px;
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+
+        input {
+          width: 100%;
+          padding: 8px;
+          margin: 4px 0;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+
+        button {
+          padding: 10px 20px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        button:disabled {
+          background: #93c5fd;
+        }
+
+        .results {
+          margin-top: 20px;
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .log-container {
+          height: 200px;
+          overflow-y: auto;
+          border: 1px solid #ddd;
+          padding: 10px;
+          border-radius: 4px;
+        }
+
+        .log-entry {
+          margin-bottom: 4px;
+          font-size: 14px;
+        }
+
+        .financial-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          margin: 16px 0;
+          padding: 16px;
+          background: #f8f9fa;
+          border-radius: 8px;
+        }
+        
+        .financial-grid label {
+          font-weight: bold;
+          color: #666;
+        }
+        
+        .financial-grid p {
+          font-size: 1.2em;
+          margin: 4px 0;
+        }
+      `}</style>
     </div>
   );
 };
