@@ -80,6 +80,87 @@ const GuitarFactoryDashboard = () => {
           <>
             <div className="intro-section">
               <h2>Production Process</h2>
+              
+              <div className="process-diagram">
+                <svg width="900" height="400" viewBox="0 0 900 400">
+                  {/* Suppliers */}
+                  <rect x="50" y="300" width="100" height="40" className="box" />
+                  <text x="100" y="325" className="label">Supplier 1</text>
+                  
+                  <rect x="50" y="350" width="100" height="40" className="box" />
+                  <text x="100" y="375" className="label">Supplier 2</text>
+
+                  {/* Storage triangles */}
+                  <path d="M 200,100 L 240,130 L 200,160 Z" className="triangle" />
+                  <text x="220" y="140" className="label">Wood</text>
+                  
+                  <path d="M 200,50 L 240,80 L 200,110 Z" className="triangle" />
+                  <text x="220" y="90" className="label">Electronic</text>
+
+                  {/* Production boxes */}
+                  <rect x="300" y="100" width="80" height="40" className="box" />
+                  <text x="340" y="125" className="label">Body</text>
+                  
+                  <rect x="300" y="200" width="80" height="40" className="box" />
+                  <text x="340" y="225" className="label">Neck</text>
+
+                  {/* Storage triangles */}
+                  <path d="M 420,100 L 460,130 L 420,160 Z" className="triangle" />
+                  <text x="440" y="140" className="label">Body storage</text>
+                  
+                  <path d="M 420,200 L 460,230 L 420,260 Z" className="triangle" />
+                  <text x="440" y="240" className="label">Neck storage</text>
+
+                  {/* Paint station */}
+                  <rect x="500" y="150" width="80" height="40" className="box" />
+                  <text x="540" y="175" className="label">Paint</text>
+
+                  {/* Post-paint storage */}
+                  <path d="M 620,100 L 660,130 L 620,160 Z" className="triangle" />
+                  <text x="640" y="140" className="label">Body storage 2</text>
+                  
+                  <path d="M 620,200 L 660,230 L 620,260 Z" className="triangle" />
+                  <text x="640" y="240" className="label">Neck storage 2</text>
+
+                  {/* Assembly and dispatch */}
+                  <rect x="700" y="150" width="80" height="40" className="box" />
+                  <text x="740" y="175" className="label">Assembler</text>
+
+                  <path d="M 800,150 L 840,180 L 800,210 Z" className="triangle" />
+                  <text x="820" y="190" className="label">Dispatch</text>
+
+                  <rect x="800" y="250" width="80" height="40" className="box" />
+                  <text x="840" y="275" className="label">Shop</text>
+
+                  {/* Connecting arrows */}
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                    refX="9" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="#000"/>
+                    </marker>
+                  </defs>
+
+                  {/* Add connecting lines with arrows */}
+                  <g className="arrows">
+                    <line x1="150" y1="320" x2="200" y2="130" markerEnd="url(#arrowhead)" />
+                    <line x1="150" y1="370" x2="200" y2="130" markerEnd="url(#arrowhead)" />
+                    <line x1="240" y1="130" x2="300" y2="120" markerEnd="url(#arrowhead)" />
+                    <line x1="240" y1="130" x2="300" y2="220" markerEnd="url(#arrowhead)" />
+                    <line x1="240" y1="80" x2="700" y2="170" markerEnd="url(#arrowhead)" />
+                    <line x1="380" y1="120" x2="420" y2="130" markerEnd="url(#arrowhead)" />
+                    <line x1="380" y1="220" x2="420" y2="230" markerEnd="url(#arrowhead)" />
+                    <line x1="460" y1="145" x2="500" y2="170" markerEnd="url(#arrowhead)" />
+                    <line x1="460" y1="245" x2="500" y2="170" markerEnd="url(#arrowhead)" />
+                    <line x1="580" y1="170" x2="620" y2="130" markerEnd="url(#arrowhead)" />
+                    <line x1="580" y1="170" x2="620" y2="230" markerEnd="url(#arrowhead)" />
+                    <line x1="660" y1="145" x2="700" y2="170" markerEnd="url(#arrowhead)" />
+                    <line x1="660" y1="245" x2="700" y2="170" markerEnd="url(#arrowhead)" />
+                    <line x1="780" y1="170" x2="800" y2="180" markerEnd="url(#arrowhead)" />
+                    <line x1="840" y1="195" x2="840" y2="250" markerEnd="url(#arrowhead)" />
+                  </g>
+                </svg>
+              </div>
+
               <div className="process-grid">
                 <div className="process-step">
                   <h3>1. Body Making</h3>
