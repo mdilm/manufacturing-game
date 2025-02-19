@@ -337,6 +337,7 @@ const GuitarFactoryDashboard = () => {
               <div>
                 <label>Employee Idle Costs:</label>
                 <p>${results.financial_results.idle_costs.toLocaleString()}</p>
+                <p className="cost-note">(Opportunity cost - not included in profit)</p>
               </div>
               <div>
                 <label>Net Profit:</label>
@@ -344,8 +345,7 @@ const GuitarFactoryDashboard = () => {
                   ${(results.financial_results.total_revenue - 
                      results.financial_results.labor_costs - 
                      results.financial_results.material_costs - 
-                     results.financial_results.fixed_costs -
-                     results.financial_results.idle_costs).toLocaleString()}
+                     results.financial_results.fixed_costs).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -696,6 +696,12 @@ const GuitarFactoryDashboard = () => {
           font-size: 0.9em;
           color: ${darkMode ? '#999' : '#666'};
           margin-top: 4px;
+        }
+
+        .cost-note {
+          font-size: 0.8em;
+          color: ${darkMode ? '#999' : '#666'};
+          margin-top: 2px;
         }
       `}</style>
     </div>

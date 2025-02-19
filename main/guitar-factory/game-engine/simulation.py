@@ -511,7 +511,7 @@ class GuitarFactorySimulation:
         self.guitar_factory.finances['profit'] = (self.guitar_factory.finances['total_revenue'] - 
                                                 labor_costs - 
                                                 self.guitar_factory.finances['material_costs'] - 
-                                                fixed_costs)
+                                                fixed_costs)  # Removed idle_costs from profit calculation
 
         return SimulationResult(
             guitars_made=self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level,
