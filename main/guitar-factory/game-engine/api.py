@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Optional
 from simulation import run_factory_simulation
+import traceback  # Add this import
 
 class SimulationParams(BaseModel):
     hours: int = 8
@@ -29,7 +30,12 @@ app.add_middleware(
 @app.post("/api/simulate")
 async def simulate(params: SimulationParams):
     try:
+        print(f"Received parameters: {params.dict()}")  # Debug print
         result = run_factory_simulation(params.dict())
+        print(f"Simulation completed successfully")  # Debug print
         return result
     except Exception as e:
+        print(f"Error in simulation: {str(e)}")  # Debug print
+        print(traceback.format_exc())  # This will print the full error traceback
         raise HTTPException(status_code=500, detail=str(e))
+    
