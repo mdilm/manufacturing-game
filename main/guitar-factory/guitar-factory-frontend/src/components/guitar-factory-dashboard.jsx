@@ -49,6 +49,8 @@ const GuitarFactoryDashboard = () => {
         totalGuitars: data.guitars_made,
         logs: data.logs,
         stationMetrics: [
+          { name: 'Wood Stock', units: data.final_state.wood_level },
+          { name: 'Electronic Parts', units: data.final_state.electronic_level },
           { name: 'Body Pre-Paint', units: data.final_state.body_pre_paint },
           { name: 'Neck Pre-Paint', units: data.final_state.neck_pre_paint },
           { name: 'Body Post-Paint', units: data.final_state.body_post_paint },

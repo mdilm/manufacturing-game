@@ -484,6 +484,8 @@ class GuitarFactorySimulation:
         env.run(until=self.total_time)
 
         final_state = {
+            'wood_level': self.guitar_factory.wood.level,
+            'electronic_level': self.guitar_factory.electronic.level,
             'body_pre_paint': self.guitar_factory.body_pre_paint.level,
             'neck_pre_paint': self.guitar_factory.neck_pre_paint.level,
             'body_post_paint': self.guitar_factory.body_post_paint.level,
