@@ -38,6 +38,7 @@ class Guitar_Factory:
             'wood_per_unit': 50,  # $50 per wood unit
             'electronic_per_unit': 100,  # $100 per electronic unit
             'guitar_sale_price': 1000,  # $1000 per guitar
+            'daily_fixed_costs': 2000, # $2000 per day fixed costs
             'hourly_wages': {
                 'body_maker': 25,
                 'neck_maker': 25,
@@ -237,11 +238,13 @@ class GuitarFactorySimulation:
         electronics_used = self.guitar_factory.guitars_made
         material_costs = (wood_used * self.guitar_factory.costs['wood_per_unit'] +
                         electronics_used * self.guitar_factory.costs['electronic_per_unit'])
+        fixed_costs = self.guitar_factory.costs['daily_fixed_costs'] * self.days
 
+        self.guitar_factory.finances['fixed_costs'] = fixed_costs
         self.guitar_factory.finances['labor_costs'] = labor_costs
         self.guitar_factory.finances['material_costs'] = material_costs
         self.guitar_factory.finances['profit'] = (self.guitar_factory.finances['total_revenue'] - 
-                                                labor_costs - material_costs)
+                                                labor_costs - material_costs - fixed_costs)
 
         return SimulationResult(
             guitars_made=self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level,
