@@ -9,6 +9,7 @@ const GuitarFactoryDashboard = () => {
     num_neck: 1,
     num_paint: 3,
     num_ensam: 2,
+    dispatch_threshold: 50,
   });
 
   const [results, setResults] = useState(null);
@@ -155,8 +156,15 @@ const GuitarFactoryDashboard = () => {
                 <div className="cost-item">
                   <h3>Revenue</h3>
                   <ul>
-                    <li>Each guitar sells for: $1,000</li>
+                    <li>Each guitar sells for: $600</li>
                     <li>Guitars are picked up in batches of 50</li>
+                  </ul>
+                </div>
+                <div className="cost-item">
+                  <h3>Dispatch</h3>
+                  <ul>
+                    <li>Dispatch cost: $500 per pickup</li>
+                    <li>Configurable threshold</li>
                   </ul>
                 </div>
               </div>
@@ -193,7 +201,7 @@ const GuitarFactoryDashboard = () => {
                 <li>Consider overtime costs vs hiring more workers</li>
                 <li>Monitor material usage and storage levels</li>
                 <li>Watch for production bottlenecks in the logs</li>
-                <li>Plan for occasional worker absences (2% daily sick rate)</li>
+                <li>Plan for occasional worker absences (5% daily sick rate)</li>
                 <li>Account for quality control failures in production planning</li>
                 <li>Consider extra capacity for paint rework</li>
               </ul>
@@ -275,6 +283,22 @@ const GuitarFactoryDashboard = () => {
           </div>
         </div>
 
+        <div className="input-group">
+          <h3>Dispatch Settings</h3>
+          <div>
+            <label>Dispatch Threshold</label>
+            <input
+              type="number"
+              name="dispatch_threshold"
+              value={params.dispatch_threshold}
+              onChange={handleInputChange}
+              min="1"
+              max="500"
+            />
+            <p className="input-help">Minimum guitars needed to trigger dispatch</p>
+          </div>
+        </div>
+
         <button
           onClick={runSimulation}
           disabled={loading}
@@ -311,9 +335,17 @@ const GuitarFactoryDashboard = () => {
                 <p>${results.financial_results.fixed_costs.toLocaleString()}</p>
               </div>
               <div>
+                <label>Employee Idle Costs:</label>
+                <p>${results.financial_results.idle_costs.toLocaleString()}</p>
+              </div>
+              <div>
                 <label>Net Profit:</label>
                 <p style={{color: results.financial_results.profit >= 0 ? 'green' : 'red'}}>
-                  ${results.financial_results.profit.toLocaleString()}
+                  ${(results.financial_results.total_revenue - 
+                     results.financial_results.labor_costs - 
+                     results.financial_results.material_costs - 
+                     results.financial_results.fixed_costs -
+                     results.financial_results.idle_costs).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -658,6 +690,12 @@ const GuitarFactoryDashboard = () => {
           input {
             font-size: 16px; /* Prevents zoom on mobile */
           }
+        }
+
+        .input-help {
+          font-size: 0.9em;
+          color: ${darkMode ? '#999' : '#666'};
+          margin-top: 4px;
         }
       `}</style>
     </div>

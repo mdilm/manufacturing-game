@@ -22,7 +22,7 @@ QUALITY_PARAMS = {
 }
 
 # Set constant probability of calling out sick each day
-SICK_DAY_PROBABILITY = 0.02  # 2% chance of calling out sick each day
+SICK_DAY_PROBABILITY = 0.05  # 5% chance of calling out sick each day
 
 def get_lognormal_time(process_type: str) -> float:
     """
@@ -68,12 +68,23 @@ class Guitar_Factory:
         self.neck_post_paint = simpy.Container(env, capacity=params['neck_post_paint_capacity'], init=0)
         self.dispatch = simpy.Container(env, capacity=params['dispatch_capacity'], init=0)
         self.dispatch_control = env.process(self.dispatch_guitars_control(env))
+        self.dispatch_threshold = params['dispatch_threshold']
         
-        # Add financial parameters
+        # Add idle time tracking
+        self.idle_times = {
+            'body_makers': 0,
+            'neck_makers': 0,
+            'painters': 0,
+            'assemblers': 0
+        }
+        
+        # Add idle costs to finances
         self.finances = {
             'total_revenue': 0,
             'labor_costs': 0,
             'material_costs': 0,
+            'idle_costs': 0,
+            'fixed_costs': 0,
             'profit': 0
         }
         
@@ -81,8 +92,9 @@ class Guitar_Factory:
         self.costs = {
             'wood_per_unit': 50,  # $50 per wood unit
             'electronic_per_unit': 100,  # $100 per electronic unit
-            'guitar_sale_price': 1000,  # $1000 per guitar
+            'guitar_sale_price': 600,  # $600 per guitar (reduced from $1000)
             'daily_fixed_costs': 2000, # $2000 per day fixed costs
+            'dispatch_cost': 500,  # $500 per dispatch call
             'hourly_wages': {
                 'body_maker': 25,
                 'neck_maker': 25,
@@ -193,7 +205,7 @@ class Guitar_Factory:
         """
         yield env.timeout(0)
         while True:
-            if self.dispatch.level >= 50:
+            if self.dispatch.level >= self.dispatch_threshold:
                 current_day = int(env.now/self.hours_per_day)
                 current_hour = env.now % self.hours_per_day
                 self.log(f'dispatch stock is {self.dispatch.level}, calling store to pick guitars at day {current_day}, hour {current_hour}')
@@ -201,11 +213,13 @@ class Guitar_Factory:
                 yield env.timeout(4)
                 self.log(f'store picking {self.dispatch.level} guitars at day {current_day}, hour {current_hour}')
                 
-                # Calculate revenue from guitars
+                # Calculate revenue and dispatch cost
                 guitars_sold = self.dispatch.level
                 revenue = guitars_sold * self.costs['guitar_sale_price']
                 self.finances['total_revenue'] += revenue
+                self.finances['material_costs'] += self.costs['dispatch_cost']  # Add dispatch cost
                 self.log(f'Revenue from sale: ${revenue:,.2f}')
+                self.log(f'Dispatch cost: ${self.costs["dispatch_cost"]:,.2f}')
                 
                 self.guitars_made += self.dispatch.level
                 yield self.dispatch.get(self.dispatch.level)
@@ -251,6 +265,16 @@ def body_maker(env, factory, worker_id):
     Function to make the body of the guitar.
     """
     while True:
+        if factory.body_pre_paint.level >= factory.params['body_pre_paint_capacity'] - 5:
+            # Worker is idle due to full storage
+            idle_start = env.now
+            factory.log(f'Body maker {worker_id+1} going idle - storage full')
+            yield env.timeout(0.1)  # Check again in 6 minutes
+            idle_time = env.now - idle_start
+            factory.idle_times['body_makers'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['body_maker']
+            continue
+            
         yield factory.wood.get(2)
         process_time = get_lognormal_time('body')
         factory.log(f'Body maker {worker_id+1} started, estimated time: {process_time:.2f} hours')
@@ -268,6 +292,15 @@ def neck_maker(env, factory, worker_id):
     Function to make the neck of the guitar.
     """
     while True:
+        if factory.neck_pre_paint.level >= factory.params['neck_pre_paint_capacity'] - 5:
+            idle_start = env.now
+            factory.log(f'Neck maker {worker_id+1} going idle - storage full')
+            yield env.timeout(0.1)
+            idle_time = env.now - idle_start
+            factory.idle_times['neck_makers'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['neck_maker']
+            continue
+            
         yield factory.wood.get(1)
         process_time = get_lognormal_time('neck')
         factory.log(f'Neck maker {worker_id+1} started, estimated time: {process_time:.2f} hours')
@@ -285,6 +318,16 @@ def painter(env, factory, worker_id):
     Function to paint the guitar.
     """
     while True:
+        if (factory.body_post_paint.level >= factory.params['body_post_paint_capacity'] - 5 or
+            factory.neck_post_paint.level >= factory.params['neck_post_paint_capacity'] - 5):
+            idle_start = env.now
+            factory.log(f'Painter {worker_id+1} going idle - storage full')
+            yield env.timeout(0.1)
+            idle_time = env.now - idle_start
+            factory.idle_times['painters'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['painter']
+            continue
+            
         if factory.body_pre_paint.level > 0 and factory.neck_pre_paint.level > 0:
             yield factory.body_pre_paint.get(1)
             yield factory.neck_pre_paint.get(1)
@@ -312,13 +355,26 @@ def painter(env, factory, worker_id):
                 else:
                     yield factory.neck_post_paint.put(1)
         else:
+            idle_start = env.now
             yield env.timeout(0.1)
+            idle_time = env.now - idle_start
+            factory.idle_times['painters'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['painter']
 
 def assembler(env, factory, worker_id):
     """
     Function to assemble the guitar.
     """
     while True:
+        if factory.dispatch.level >= factory.params['dispatch_capacity'] - 5:
+            idle_start = env.now
+            factory.log(f'Assembler {worker_id+1} going idle - dispatch full')
+            yield env.timeout(0.1)
+            idle_time = env.now - idle_start
+            factory.idle_times['assemblers'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['assembler']
+            continue
+            
         if factory.body_post_paint.level > 0 and factory.neck_post_paint.level > 0 and factory.electronic.level > 0:
             yield factory.body_post_paint.get(1)
             yield factory.neck_post_paint.get(1)
@@ -337,10 +393,14 @@ def assembler(env, factory, worker_id):
                     factory.costs['electronic_per_unit']
                 )
         else:
+            idle_start = env.now
             yield env.timeout(0.1)
+            idle_time = env.now - idle_start
+            factory.idle_times['assemblers'] += idle_time
+            factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['assembler']
 
 class GuitarFactorySimulation:
-    def __init__(self, hours=8, days=23, num_body=2, num_neck=1, num_paint=3, num_ensam=2):
+    def __init__(self, hours=8, days=23, num_body=2, num_neck=1, num_paint=3, num_ensam=2, dispatch_threshold=50):
         """
         Initialize the simulation.
         """
@@ -370,7 +430,8 @@ class GuitarFactorySimulation:
             'num_neck': num_neck,
             'num_paint': num_paint,
             'num_ensam': num_ensam,
-            'hours': hours
+            'hours': hours,
+            'dispatch_threshold': dispatch_threshold,
         }
 
     def run_simulation(self):
@@ -465,6 +526,7 @@ def run_factory_simulation(params: dict) -> SimulationResult:
         num_body=params.get('num_body', 2),
         num_neck=params.get('num_neck', 1),
         num_paint=params.get('num_paint', 3),
-        num_ensam=params.get('num_ensam', 2)
+        num_ensam=params.get('num_ensam', 2),
+        dispatch_threshold=params.get('dispatch_threshold', 50)
     )
     return simulation.run_simulation()
