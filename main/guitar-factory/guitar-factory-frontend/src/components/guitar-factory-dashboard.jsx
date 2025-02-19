@@ -83,25 +83,29 @@ const GuitarFactoryDashboard = () => {
               <div className="process-grid">
                 <div className="process-step">
                   <h3>1. Body Making</h3>
-                  <p>Takes 1 hour</p>
+                  <p>Average time: 1 hour</p>
+                  <p>(Actual time varies)</p>
                   <p>Uses 2 wood units</p>
                   <p>Worker wage: $25/hour</p>
                 </div>
                 <div className="process-step">
                   <h3>2. Neck Making</h3>
-                  <p>Takes 1 hour</p>
+                  <p>Average time: 1 hour</p>
+                  <p>(Actual time varies)</p>
                   <p>Uses 1 wood unit</p>
                   <p>Worker wage: $25/hour</p>
                 </div>
                 <div className="process-step">
                   <h3>3. Painting</h3>
-                  <p>Takes 2 hours</p>
+                  <p>Average time: 2 hours</p>
+                  <p>(Actual time varies)</p>
                   <p>Paints both body and neck</p>
                   <p>Worker wage: $30/hour</p>
                 </div>
                 <div className="process-step">
                   <h3>4. Assembly</h3>
-                  <p>Takes 1 hour</p>
+                  <p>Average time: 1 hour</p>
+                  <p>(Actual time varies)</p>
                   <p>Uses 1 electronic unit</p>
                   <p>Worker wage: $28/hour</p>
                 </div>
@@ -143,12 +147,39 @@ const GuitarFactoryDashboard = () => {
             </div>
 
             <div className="intro-section">
+              <h2>Quality Control</h2>
+              <div className="process-grid">
+                <div className="process-step">
+                  <h3>Body & Neck Making</h3>
+                  <p>92% average pass rate</p>
+                  <p>Failed parts are scrapped</p>
+                  <p>Materials cost lost on failure</p>
+                </div>
+                <div className="process-step">
+                  <h3>Painting</h3>
+                  <p>85% average pass rate</p>
+                  <p>Failed parts are repainted</p>
+                  <p>Additional time and labor cost</p>
+                </div>
+                <div className="process-step">
+                  <h3>Assembly</h3>
+                  <p>98% average pass rate</p>
+                  <p>Failed assemblies are scrapped</p>
+                  <p>All materials lost on failure</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="intro-section">
               <h2>Strategy Tips</h2>
               <ul className="tips-list">
                 <li>Balance worker numbers to avoid bottlenecks</li>
                 <li>Consider overtime costs vs hiring more workers</li>
                 <li>Monitor material usage and storage levels</li>
                 <li>Watch for production bottlenecks in the logs</li>
+                <li>Plan for occasional worker absences (2% daily sick rate)</li>
+                <li>Account for quality control failures in production planning</li>
+                <li>Consider extra capacity for paint rework</li>
               </ul>
             </div>
           </>
