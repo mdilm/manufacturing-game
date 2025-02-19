@@ -13,6 +13,7 @@ class SimulationParams(BaseModel):
     num_neck: int = 1
     num_paint: int = 3
     num_ensam: int = 2
+    dispatch_threshold: int = 50
 
 app = FastAPI()
 
