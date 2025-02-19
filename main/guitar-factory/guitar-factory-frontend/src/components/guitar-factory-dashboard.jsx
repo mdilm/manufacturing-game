@@ -344,8 +344,7 @@ const GuitarFactoryDashboard = () => {
                   ${(results.financial_results.total_revenue - 
                      results.financial_results.labor_costs - 
                      results.financial_results.material_costs - 
-                     results.financial_results.fixed_costs -
-                     results.financial_results.idle_costs).toLocaleString()}
+                     results.financial_results.fixed_costs).toLocaleString()}
                 </p>
               </div>
             </div>
