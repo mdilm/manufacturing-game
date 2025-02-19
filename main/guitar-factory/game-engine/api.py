@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Optional
 from simulation import run_factory_simulation
-import traceback  # Add this import
+import traceback
 
 class SimulationParams(BaseModel):
     hours: int = 8
