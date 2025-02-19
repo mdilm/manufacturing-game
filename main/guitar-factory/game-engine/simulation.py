@@ -4,7 +4,8 @@ import math
 from dataclasses import dataclass
 from typing import List, Dict
 
-# Add these constants at the top of the file for base processing times and variability
+## GLOBAL CONSTANTS
+# Set constant mean and variability for each processing time
 PROCESS_TIMES = {
     'body': {'mean': 1.0, 'sigma': 0.2},  # 1 hour base time
     'neck': {'mean': 1.0, 'sigma': 0.2},  # 1 hour base time
@@ -12,7 +13,7 @@ PROCESS_TIMES = {
     'assembly': {'mean': 1.0, 'sigma': 0.2}  # 1 hour base time
 }
 
-# Add these constants at the top with others
+# Set constant mean and variability for each quality check
 QUALITY_PARAMS = {
     'body': {'mean': 0.92, 'std': 0.05},  # 92% pass rate for body making
     'neck': {'mean': 0.92, 'std': 0.05},  # 92% pass rate for neck making
@@ -20,7 +21,7 @@ QUALITY_PARAMS = {
     'assembly': {'mean': 0.98, 'std': 0.02}  # 98% pass rate for assembly
 }
 
-# Add to the top with other constants
+# Set constant probability of calling out sick each day
 SICK_DAY_PROBABILITY = 0.02  # 2% chance of calling out sick each day
 
 def get_lognormal_time(process_type: str) -> float:
@@ -99,7 +100,7 @@ class Guitar_Factory:
             'assemblers': []
         }
         
-        # Initialize all workers as available
+        # Initialize all workers
         self.total_workers = {
             'body_makers': params['num_body'],
             'neck_makers': params['num_neck'],
@@ -114,6 +115,9 @@ class Guitar_Factory:
         self.logs.append(message)
 
     def wood_stock_control(self, env, wood_critical_stock):
+        """
+        Function to control the wood stock.
+        """
         yield env.timeout(0)
         while True:
             if self.wood.level <= wood_critical_stock:
@@ -141,6 +145,9 @@ class Guitar_Factory:
                 yield env.timeout(1)
     
     def electronic_stock_control(self, env):
+        """
+        Function to control the electronic stock.
+        """
         yield env.timeout(0)
         while True:
             if self.electronic.level <= 30:
@@ -168,6 +175,9 @@ class Guitar_Factory:
                 yield env.timeout(1)
                 
     def calculate_worker_pay(self, hours_worked, role):
+        """
+        Function to calculate the pay for a worker.
+        """
         base_rate = self.costs['hourly_wages'][role]
         regular_hours = min(40, hours_worked)
         overtime_hours = max(0, hours_worked - 40)
@@ -178,6 +188,9 @@ class Guitar_Factory:
         return regular_pay + overtime_pay
 
     def dispatch_guitars_control(self, env):
+        """
+        Function to control the dispatch of guitars.
+        """
         yield env.timeout(0)
         while True:
             if self.dispatch.level >= 50:
@@ -202,7 +215,9 @@ class Guitar_Factory:
                 yield env.timeout(1)
 
     def update_worker_availability(self, env):
-        """Updates worker availability at the start of each day"""
+        """
+        Updates worker availability at the start of each day
+        """
         while True:
             # Wait until start of next day
             next_day = (int(env.now / self.hours_per_day) + 1) * self.hours_per_day
@@ -232,6 +247,9 @@ class Guitar_Factory:
             self.log('----------------------------------')
 
 def body_maker(env, factory, worker_id):
+    """
+    Function to make the body of the guitar.
+    """
     while True:
         yield factory.wood.get(2)
         process_time = get_lognormal_time('body')
@@ -246,6 +264,9 @@ def body_maker(env, factory, worker_id):
             factory.finances['material_costs'] += 2 * factory.costs['wood_per_unit']
 
 def neck_maker(env, factory, worker_id):
+    """
+    Function to make the neck of the guitar.
+    """
     while True:
         yield factory.wood.get(1)
         process_time = get_lognormal_time('neck')
@@ -260,6 +281,9 @@ def neck_maker(env, factory, worker_id):
             factory.finances['material_costs'] += factory.costs['wood_per_unit']
 
 def painter(env, factory, worker_id):
+    """
+    Function to paint the guitar.
+    """
     while True:
         if factory.body_pre_paint.level > 0 and factory.neck_pre_paint.level > 0:
             yield factory.body_pre_paint.get(1)
@@ -291,6 +315,9 @@ def painter(env, factory, worker_id):
             yield env.timeout(0.1)
 
 def assembler(env, factory, worker_id):
+    """
+    Function to assemble the guitar.
+    """
     while True:
         if factory.body_post_paint.level > 0 and factory.neck_post_paint.level > 0 and factory.electronic.level > 0:
             yield factory.body_post_paint.get(1)
@@ -314,6 +341,9 @@ def assembler(env, factory, worker_id):
 
 class GuitarFactorySimulation:
     def __init__(self, hours=8, days=23, num_body=2, num_neck=1, num_paint=3, num_ensam=2):
+        """
+        Initialize the simulation.
+        """
         self.hours = hours
         self.days = days
         self.total_time = hours * days
@@ -344,6 +374,9 @@ class GuitarFactorySimulation:
         }
 
     def run_simulation(self):
+        """
+        Run the simulation.
+        """
         env = simpy.Environment()
         self.guitar_factory = Guitar_Factory(env, self.params)
 

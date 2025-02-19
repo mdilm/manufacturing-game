@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const GuitarFactoryDashboard = () => {
@@ -14,6 +14,14 @@ const GuitarFactoryDashboard = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const runSimulation = async () => {
     setLoading(true);
@@ -65,9 +73,17 @@ const GuitarFactoryDashboard = () => {
   };
 
   return (
-    <div className="container">
+    <div className={`container ${darkMode ? 'dark-mode' : ''}`}>
       <div className="introduction">
-        <h1>Guitar Factory Simulation</h1>
+        <div className="header-row">
+          <h1>Guitar Factory Simulation</h1>
+          <button 
+            className="theme-toggle"
+            onClick={() => setDarkMode(!darkMode)}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+        </div>
         
         <button 
           className="toggle-button"
@@ -303,20 +319,34 @@ const GuitarFactoryDashboard = () => {
             </div>
           </div>
 
-          <div className="chart">
-            <BarChart
-              width={800}
-              height={400}
-              data={results.stationMetrics}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="units" fill="#3b82f6" name="Units" />
-            </BarChart>
+          <div className="chart-container">
+            {windowWidth > 768 ? (
+              <BarChart
+                width={Math.min(800, windowWidth - 40)}
+                height={400}
+                data={results.stationMetrics}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="units" fill="#3b82f6" name="Units" />
+              </BarChart>
+            ) : (
+              <>
+                <h3>Station Metrics</h3>
+                <div className="mobile-metrics">
+                  {results.stationMetrics.map((station, index) => (
+                    <div key={index} className="metric-card">
+                      <h4>{station.name}</h4>
+                      <p className="metric-value">{station.units} units</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="logs">
@@ -513,6 +543,121 @@ const GuitarFactoryDashboard = () => {
         .financial-grid p {
           font-size: 1.2em;
           margin: 4px 0;
+        }
+
+        .dark-mode {
+          background-color: #1a1a1a;
+          color: #e5e5e5;
+        }
+
+        .dark-mode .introduction,
+        .dark-mode .controls,
+        .dark-mode .results,
+        .dark-mode .process-step,
+        .dark-mode .cost-item {
+          background: #2d2d2d;
+          color: #e5e5e5;
+        }
+
+        .dark-mode .intro-section {
+          background: #222;
+        }
+
+        .dark-mode input {
+          background: #333;
+          color: #e5e5e5;
+          border-color: #444;
+        }
+
+        .dark-mode .financial-grid {
+          background: #222;
+        }
+
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .theme-toggle {
+          padding: 8px 12px;
+          font-size: 1.2em;
+          background: transparent;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .dark-mode .theme-toggle {
+          border-color: #444;
+        }
+
+        .dark-mode .log-container {
+          background: #333;
+          border-color: #444;
+        }
+
+        .dark-mode .toggle-button:not(:hover) {
+          background: #444;
+        }
+
+        .chart-container {
+          width: 100%;
+          overflow-x: auto;
+          margin: 20px 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .mobile-metrics {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 10px;
+          width: 100%;
+          padding: 10px;
+        }
+
+        .metric-card {
+          background: ${darkMode ? '#2d2d2d' : 'white'};
+          padding: 15px;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          text-align: center;
+        }
+
+        .metric-card h4 {
+          margin: 0 0 10px 0;
+          font-size: 0.9em;
+          color: ${darkMode ? '#e5e5e5' : '#4b5563'};
+        }
+
+        .metric-value {
+          font-size: 1.2em;
+          font-weight: bold;
+          color: #3b82f6;
+          margin: 0;
+        }
+
+        @media (max-width: 768px) {
+          .container {
+            padding: 10px;
+          }
+
+          .process-grid, 
+          .costs-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .financial-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          input {
+            font-size: 16px; /* Prevents zoom on mobile */
+          }
         }
       `}</style>
     </div>
