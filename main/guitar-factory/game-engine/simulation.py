@@ -217,41 +217,41 @@ class Guitar_Factory:
                 self.log(f'- {worker_type}: {len(available)}/{self.total_workers[worker_type]} workers present')
             self.log('----------------------------------')
 
-def body_maker(env, factory):
+def body_maker(env, factory, worker_id):
     while True:
         yield factory.wood.get(2)
         process_time = get_lognormal_time('body')
-        factory.log(f'Body making started, estimated time: {process_time:.2f} hours')
+        factory.log(f'Body maker {worker_id+1} started, estimated time: {process_time:.2f} hours')
         yield env.timeout(process_time)
 
         if quality_check('body'):
             yield factory.body_pre_paint.put(1)
-            factory.log(f'Body completed in {process_time:.2f} hours')
+            factory.log(f'Body maker {worker_id+1} completed in {process_time:.2f} hours')
         else:
-            factory.log('Body failed quality check - Materials scrapped')
+            factory.log(f'Body maker {worker_id+1} failed quality check - Materials scrapped')
             factory.finances['material_costs'] += 2 * factory.costs['wood_per_unit']
 
-def neck_maker(env, factory):
+def neck_maker(env, factory, worker_id):
     while True:
         yield factory.wood.get(1)
         process_time = get_lognormal_time('neck')
-        factory.log(f'Neck making started, estimated time: {process_time:.2f} hours')
+        factory.log(f'Neck maker {worker_id+1} started, estimated time: {process_time:.2f} hours')
         yield env.timeout(process_time)
 
         if quality_check('neck'):
             yield factory.neck_pre_paint.put(1)
-            factory.log(f'Neck completed in {process_time:.2f} hours')
+            factory.log(f'Neck maker {worker_id+1} completed in {process_time:.2f} hours')
         else:
-            factory.log('Neck failed quality check - Materials scrapped')
+            factory.log(f'Neck maker {worker_id+1} failed quality check - Materials scrapped')
             factory.finances['material_costs'] += factory.costs['wood_per_unit']
 
-def painter(env, factory):
+def painter(env, factory, worker_id):
     while True:
         if factory.body_pre_paint.level > 0 and factory.neck_pre_paint.level > 0:
             yield factory.body_pre_paint.get(1)
             yield factory.neck_pre_paint.get(1)
             process_time = get_lognormal_time('paint')
-            factory.log(f'Painting started, estimated time: {process_time:.2f} hours')
+            factory.log(f'Painter {worker_id+1} started, estimated time: {process_time:.2f} hours')
             yield env.timeout(process_time)
 
             body_quality = quality_check('paint')
@@ -260,43 +260,43 @@ def painter(env, factory):
             if body_quality and neck_quality:
                 yield factory.body_post_paint.put(1)
                 yield factory.neck_post_paint.put(1)
-                factory.log(f'Painting completed in {process_time:.2f} hours')
+                factory.log(f'Painter {worker_id+1} completed in {process_time:.2f} hours')
             else:
                 if not body_quality:
                     yield factory.body_pre_paint.put(1)
-                    factory.log('Body paint failed QC - Returning for repainting')
+                    factory.log(f'Painter {worker_id+1}: Body paint failed QC - Returning for repainting')
                 else:
                     yield factory.body_post_paint.put(1)
 
                 if not neck_quality:
                     yield factory.neck_pre_paint.put(1)
-                    factory.log('Neck paint failed QC - Returning for repainting')
+                    factory.log(f'Painter {worker_id+1}: Neck paint failed QC - Returning for repainting')
                 else:
                     yield factory.neck_post_paint.put(1)
         else:
-            yield env.timeout(0.1)  # Check again in 6 minutes
+            yield env.timeout(0.1)
 
-def assembler(env, factory):
+def assembler(env, factory, worker_id):
     while True:
         if factory.body_post_paint.level > 0 and factory.neck_post_paint.level > 0 and factory.electronic.level > 0:
             yield factory.body_post_paint.get(1)
             yield factory.neck_post_paint.get(1)
             yield factory.electronic.get(1)
             process_time = get_lognormal_time('assembly')
-            factory.log(f'Assembly started, estimated time: {process_time:.2f} hours')
+            factory.log(f'Assembler {worker_id+1} started, estimated time: {process_time:.2f} hours')
             yield env.timeout(process_time)
 
             if quality_check('assembly'):
                 yield factory.dispatch.put(1)
-                factory.log(f'Assembly completed in {process_time:.2f} hours')
+                factory.log(f'Assembler {worker_id+1} completed in {process_time:.2f} hours')
             else:
-                factory.log('Assembly failed quality check - Materials scrapped')
+                factory.log(f'Assembler {worker_id+1} failed quality check - Materials scrapped')
                 factory.finances['material_costs'] += (
                     3 * factory.costs['wood_per_unit'] +
                     factory.costs['electronic_per_unit']
                 )
         else:
-            yield env.timeout(0.1)  # Check again in 6 minutes
+            yield env.timeout(0.1)
 
 class GuitarFactorySimulation:
     def __init__(self, hours=8, days=23, num_body=2, num_neck=1, num_paint=3, num_ensam=2):
