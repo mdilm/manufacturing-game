@@ -55,6 +55,7 @@ class SimulationResult:
 
 class Guitar_Factory:
     def __init__(self, env, params):
+        self.params = params
         self.hours_per_day = params['hours']
         self.logs = []
         self.guitars_made = 0
