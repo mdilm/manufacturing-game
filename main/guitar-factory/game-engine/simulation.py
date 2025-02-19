@@ -125,7 +125,14 @@ class Guitar_Factory:
                 yield env.timeout(16)
                 self.log('wood supplier arrives at day {0}, hour {1}'.format(
                     current_day, current_hour))
-                yield self.wood.put(300)
+                
+                # Add wood purchase cost when buying wood
+                wood_purchase = 300
+                purchase_cost = wood_purchase * self.costs['wood_per_unit']
+                self.finances['material_costs'] += purchase_cost
+                self.log(f'Purchased {wood_purchase} wood units for ${purchase_cost:,.2f}')
+                
+                yield self.wood.put(wood_purchase)
                 self.log('new wood stock is {0}'.format(
                     self.wood.level))
                 self.log('----------------------------------')
@@ -145,7 +152,14 @@ class Guitar_Factory:
                 yield env.timeout(9)
                 self.log('electronic supplier arrives at day {0}, hour {1}'.format(
                     current_day, current_hour))
-                yield self.electronic.put(30)
+                
+                # Add electronic purchase cost when buying electronics
+                electronic_purchase = 30
+                purchase_cost = electronic_purchase * self.costs['electronic_per_unit']
+                self.finances['material_costs'] += purchase_cost
+                self.log(f'Purchased {electronic_purchase} electronic units for ${purchase_cost:,.2f}')
+                
+                yield self.electronic.put(electronic_purchase)
                 self.log('new electronic stock is {0}'.format(
                     self.electronic.level))
                 self.log('----------------------------------')
@@ -394,18 +408,15 @@ class GuitarFactorySimulation:
         labor_costs += self.num_paint * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'painter')
         labor_costs += self.num_ensam * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'assembler')
 
-        # Calculate material costs
-        wood_used = (self.guitar_factory.guitars_made * 3)  # 2 for body + 1 for neck
-        electronics_used = self.guitar_factory.guitars_made
-        material_costs = (wood_used * self.guitar_factory.costs['wood_per_unit'] +
-                        electronics_used * self.guitar_factory.costs['electronic_per_unit'])
         fixed_costs = self.guitar_factory.costs['daily_fixed_costs'] * self.days
 
+        # Material costs are now tracked in real-time, just need to update the finances
         self.guitar_factory.finances['fixed_costs'] = fixed_costs
         self.guitar_factory.finances['labor_costs'] = labor_costs
-        self.guitar_factory.finances['material_costs'] = material_costs
         self.guitar_factory.finances['profit'] = (self.guitar_factory.finances['total_revenue'] - 
-                                                labor_costs - material_costs - fixed_costs)
+                                                labor_costs - 
+                                                self.guitar_factory.finances['material_costs'] - 
+                                                fixed_costs)
 
         return SimulationResult(
             guitars_made=self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level,
