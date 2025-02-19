@@ -126,6 +126,13 @@ const GuitarFactoryDashboard = () => {
                   </ul>
                 </div>
                 <div className="cost-item">
+                  <h3>Fixed Costs</h3>
+                  <ul>
+                    <li>Daily factory operation: $2,000</li>
+                    <li>Includes utilities, maintenance, etc.</li>
+                  </ul>
+                </div>
+                <div className="cost-item">
                   <h3>Revenue</h3>
                   <ul>
                     <li>Each guitar sells for: $1,000</li>
@@ -251,6 +258,10 @@ const GuitarFactoryDashboard = () => {
               <div>
                 <label>Material Costs:</label>
                 <p>${results.financial_results.material_costs.toLocaleString()}</p>
+              </div>
+              <div>
+                <label>Fixed Costs:</label>
+                <p>${results.financial_results.fixed_costs.toLocaleString()}</p>
               </div>
               <div>
                 <label>Net Profit:</label>
