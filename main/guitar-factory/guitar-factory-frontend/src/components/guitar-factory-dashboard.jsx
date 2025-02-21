@@ -356,13 +356,19 @@ const GuitarFactoryDashboard = () => {
           <div className="chart-container">
             {windowWidth > 768 ? (
               <BarChart
-                width={Math.min(800, windowWidth - 40)}
-                height={400}
+                width={Math.min(1200, windowWidth - 40)}
+                height={500}
                 data={results.stationMetrics}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -396,16 +402,19 @@ const GuitarFactoryDashboard = () => {
         </div>
       )}
       <style jsx>{`
-        :global(body) {
+        :global(html), :global(body) {
           margin: 0;
           padding: 0;
           min-height: 100vh;
+          width: 100%;
           background-color: ${darkMode ? '#1a1a1a' : '#ffffff'};
           transition: background-color 0.3s ease;
         }
 
         :global(#root) {
           min-height: 100vh;
+          width: 100%;
+          background-color: ${darkMode ? '#1a1a1a' : '#ffffff'};
         }
 
         .container {
@@ -659,6 +668,7 @@ const GuitarFactoryDashboard = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
+          padding-bottom: 20px;
         }
 
         .mobile-metrics {
