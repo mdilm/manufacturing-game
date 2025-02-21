@@ -1,120 +1,95 @@
 # Guitar Factory Simulation Game
 
-A web-based factory simulation game where players optimize a guitar manufacturing production line. Players balance staffing levels, manage resources, and optimize production flow to maximize profits.
+A web-based factory simulation game where players manage a guitar manufacturing facility. Balance resources, staffing, and logistics to maximize profit.
 
-## Overview
+## Game Features
 
-The Guitar Factory Simulation is an educational game that demonstrates principles of:
-- Manufacturing process optimization
-- Resource allocation
-- Supply chain management
-- Financial decision-making
-- Production line balancing
+### Production Process
+- Four-stage manufacturing: Body Making, Neck Making, Painting, and Assembly
+- Variable processing times with realistic distributions
+- Quality control at each stage with different pass rates
+- Worker attendance system (5% daily sick rate)
 
-## How It Works
+### Resource Management
+- Wood and electronic parts inventory tracking
+- Dynamic material ordering based on staffing levels
+- Configurable dispatch threshold system
+- Storage capacity limits for all production stages
 
-Players manage a guitar factory with four main production stages:
-1. Body Making (1 hour, uses 2 wood units)
-2. Neck Making (1 hour, uses 1 wood unit)
-3. Painting (2 hours, handles both body and neck)
-4. Assembly (1 hour, uses 1 electronic unit)
+### Financial System
+- Revenue: $800 per guitar
+- Material Costs:
+  - Wood: $50 per unit
+  - Electronics: $100 per unit
+  - Dispatch Cost: $500 per pickup
+- Labor Costs:
+  - Body/Neck Makers: $25/hour
+  - Painters: $30/hour
+  - Assemblers: $28/hour
+  - 1.5× overtime rate over 40 hours/week
+- Fixed daily operating costs: $2,000
+- Idle time tracking (shown as opportunity cost)
 
-### Key Features
-- Adjustable staffing levels for each production stage
-- Configurable working hours and days
+### Quality Control
+- Body & Neck Making: 92% pass rate
+- Painting: 85% pass rate (failed items can be reworked)
+- Assembly: 98% pass rate
+- Failed items impact material costs
+
+### Customizable Parameters
+- Working hours per day
+- Number of working days
+- Staffing levels for each role
+- Dispatch threshold for finished goods
+
+### User Interface
+- Dark/Light mode toggle
+- Responsive design for all screen sizes
 - Real-time production metrics
-- Financial reporting including revenue, labor costs, and material costs
-- Production logs showing bottlenecks and issues
-- Storage management between production stages
+- Detailed financial reporting
+- Production log viewer
+- Interactive charts and statistics
 
-### Game Parameters
+## Strategic Elements
+- Balance worker numbers to prevent bottlenecks
+- Optimize dispatch threshold for cost efficiency
+- Manage inventory levels and storage capacity
+- Plan for worker absences and quality control failures
+- Trade-off between overtime and additional hiring
 
-**Materials:**
-- Wood: $50 per unit
-- Electronics: $100 per unit
-
-**Labor:**
-- Body/Neck Makers: $25/hour
-- Painters: $30/hour
-- Assemblers: $28/hour
-- Overtime (>40hrs/week): 1.5× regular rate
-
-**Revenue:**
-- Each guitar sells for $1,000
-- Guitars are shipped in batches of 50
-
-## Technical Architecture
-
-### Backend (Python)
-The simulation engine is built using:
-- SimPy for discrete event simulation
-- FastAPI for the REST API
-- Python's dataclasses for structured data management
-
-The simulation engine models:
-- Worker availability and scheduling
-- Material flow through production stages
-- Storage buffers between stages
-- Production timing and dependencies
-- Resource constraints and bottlenecks
-
-### Frontend (React)
-Built with:
-- React for UI components
-- Recharts for data visualization
-- CSS modules for styling
-- Fetch API for backend communication
-
-Features:
-- Interactive control panel for simulation parameters
-- Real-time production metrics display
-- Collapsible instructions section
-- Financial results dashboard
-- Production logs viewer
+## Technical Details
+- Frontend: React with Recharts for data visualization
+- Backend: Python with SimPy for discrete event simulation
+- RESTful API for simulation execution
+- Responsive design for mobile and desktop use
 
 ## Getting Started
-
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   # Backend
-   cd game-engine
-   pip install -r requirements.txt
-
    # Frontend
-   cd ../guitar-factory-frontend
+   cd guitar-factory-frontend
    npm install
-   ```
 
+   # Backend
+   cd ../game-engine
+   pip install -r requirements.txt
+   ```
 3. Start the development servers:
    ```bash
-   # Backend
-   cd game-engine
-   uvicorn api:app --reload
-
    # Frontend
-   cd ../guitar-factory-frontend
    npm start
+
+   # Backend
+   python api.py
    ```
 
-4. Open http://localhost:3000 in your browser
-
-## Strategy Tips
-
-- Balance worker numbers across stages to prevent bottlenecks
-- Consider overtime costs versus hiring additional workers
-- Monitor material usage and storage levels
-- Watch production logs for bottleneck identification
-- Optimize batch sizes for efficient production flow
-
 ## Future Enhancements
-
-- Additional guitar models with different requirements
-- Quality control mechanics
-- Machine maintenance and reliability
-- Worker skill levels and training
+- Additional guitar models with different complexities
+- Equipment upgrades and maintenance
+- Worker skill development system
 - Market demand fluctuations
-- Seasonal variations in production
+- Seasonal events and challenges
 
 ## Contributing
 

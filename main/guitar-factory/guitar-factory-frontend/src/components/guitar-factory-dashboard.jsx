@@ -159,7 +159,9 @@ const GuitarFactoryDashboard = () => {
                   <h3>Revenue</h3>
                   <ul>
                     <li>Each guitar sells for: $800</li>
-                    <li>Guitars are picked up in batches of 50</li>
+                    <li>Guitars are picked up when reaching dispatch threshold</li>
+                    <li>Each dispatch costs $500 regardless of batch size</li>
+                    <li>Higher threshold means fewer dispatches but more storage used</li>
                   </ul>
                 </div>
                 <div className="cost-item">
@@ -202,6 +204,7 @@ const GuitarFactoryDashboard = () => {
                 <li>Balance worker numbers to avoid bottlenecks</li>
                 <li>Consider overtime costs vs hiring more workers</li>
                 <li>Monitor material usage and storage levels</li>
+                <li>Optimize dispatch threshold: lower means frequent small batches, higher means fewer large batches</li>
                 <li>Watch for production bottlenecks in the logs</li>
                 <li>Plan for occasional worker absences (5% daily sick rate)</li>
                 <li>Account for quality control failures in production planning</li>
