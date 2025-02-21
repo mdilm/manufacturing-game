@@ -6,14 +6,16 @@ from typing import Dict, Optional
 from simulation import GuitarFactorySimulation
 import traceback
 
-class SimulationParams(BaseModel):
+class SimulationRequest(BaseModel):
     hours: int = 8
-    days: int = 23
+    days: int = 5
     num_body: int = 2
     num_neck: int = 1
     num_paint: int = 3
     num_ensam: int = 2
     dispatch_threshold: int = 50
+    total_demand: int = 200
+    current_week: int = 1
 
 app = FastAPI()
 
@@ -30,19 +32,29 @@ app.add_middleware(
 current_simulation = None
 
 @app.post("/api/simulate_week")
-async def simulate_week(request: Request):
+async def simulate_week(request: SimulationRequest):
     try:
-        params = await request.json()
-        print(f"Received request with params: {params}")  # Debug logging
+        print(f"Received request with params: {request}")
         
-        simulation = GuitarFactorySimulation(**params)
+        # Create new simulation for this week
+        simulation = GuitarFactorySimulation(
+            hours=request.hours,
+            days=request.days,
+            num_body=request.num_body,
+            num_neck=request.num_neck,
+            num_paint=request.num_paint,
+            num_ensam=request.num_ensam,
+            dispatch_threshold=request.dispatch_threshold,
+            total_demand=request.total_demand,
+            current_week=request.current_week
+        )
+        
         result = simulation.run_weekly_simulation()
+        print(f"Returning result: {result}")
         
-        print(f"Returning result: {result}")  # Debug logging
         return result
-        
     except Exception as e:
-        print(f"Error in simulation: {str(e)}")  # Debug logging
+        print(f"Error in simulation: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == '__main__':
