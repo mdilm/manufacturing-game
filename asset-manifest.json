@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/manufacturing-game/static/css/main.f855e6bc.css",
-    "main.js": "/manufacturing-game/static/js/main.6db61b1b.js",
+    "main.js": "/manufacturing-game/static/js/main.2ae50e28.js",
     "static/js/488.be80af38.chunk.js": "/manufacturing-game/static/js/488.be80af38.chunk.js",
     "index.html": "/manufacturing-game/index.html",
     "main.f855e6bc.css.map": "/manufacturing-game/static/css/main.f855e6bc.css.map",
-    "main.6db61b1b.js.map": "/manufacturing-game/static/js/main.6db61b1b.js.map",
+    "main.2ae50e28.js.map": "/manufacturing-game/static/js/main.2ae50e28.js.map",
     "488.be80af38.chunk.js.map": "/manufacturing-game/static/js/488.be80af38.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.6db61b1b.js"
+    "static/js/main.2ae50e28.js"
   ]
 }
