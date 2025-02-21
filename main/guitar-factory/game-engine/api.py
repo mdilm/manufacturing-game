@@ -17,12 +17,10 @@ class SimulationParams(BaseModel):
 
 app = FastAPI()
 
-# Get CORS origins from environment variable, fallback to localhost for development
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
-
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=["*"],  # For development - restrict this in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,18 +30,20 @@ app.add_middleware(
 current_simulation = None
 
 @app.post("/api/simulate_week")
-async def simulate_week(params: dict):
-    global current_simulation
-    
-    if current_simulation is None or params.get('current_week') == 1:
-        # Create new simulation for first week
-        current_simulation = GuitarFactorySimulation(**params)
-    else:
-        # Update parameters for existing simulation
-        current_simulation.current_week = params.get('current_week')
-        current_simulation.update_params(params)
-    
-    return current_simulation.run_weekly_simulation()
+async def simulate_week(request: Request):
+    try:
+        params = await request.json()
+        print(f"Received request with params: {params}")  # Debug logging
+        
+        simulation = GuitarFactorySimulation(**params)
+        result = simulation.run_weekly_simulation()
+        
+        print(f"Returning result: {result}")  # Debug logging
+        return result
+        
+    except Exception as e:
+        print(f"Error in simulation: {str(e)}")  # Debug logging
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == '__main__':
     app.run(debug=True)
