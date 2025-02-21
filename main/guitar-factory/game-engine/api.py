@@ -1,9 +1,9 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Optional
-from simulation import run_factory_simulation
+from simulation import GuitarFactorySimulation
 import traceback
 
 class SimulationParams(BaseModel):
@@ -28,15 +28,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/api/simulate")
-async def simulate(params: SimulationParams):
-    try:
-        print(f"Received parameters: {params.dict()}")  # Debug print
-        result = run_factory_simulation(params.dict())
-        print(f"Simulation completed successfully")  # Debug print
-        return result
-    except Exception as e:
-        print(f"Error in simulation: {str(e)}")  # Debug print
-        print(traceback.format_exc())  # This will print the full error traceback
-        raise HTTPException(status_code=500, detail=str(e))
+# Store simulation instance
+current_simulation = None
+
+@app.post("/api/simulate_week")
+async def simulate_week(params: dict):
+    global current_simulation
+    
+    if current_simulation is None or params.get('current_week') == 1:
+        # Create new simulation for first week
+        current_simulation = GuitarFactorySimulation(**params)
+    else:
+        # Update parameters for existing simulation
+        current_simulation.current_week = params.get('current_week')
+        current_simulation.update_params(params)
+    
+    return current_simulation.run_weekly_simulation()
+
+if __name__ == '__main__':
+    app.run(debug=True)
     

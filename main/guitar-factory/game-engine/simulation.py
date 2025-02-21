@@ -53,6 +53,17 @@ class SimulationResult:
     final_state: Dict
     financial_results: Dict
 
+@dataclass
+class WeeklyResult:
+    guitars_made: int
+    logs: List[str]
+    final_state: Dict
+    financial_results: Dict
+    week_number: int
+    remaining_demand: int
+    overproduction: int
+    demand_penalty: float
+
 class Guitar_Factory:
     def __init__(self, env, params):
         self.params = params
@@ -201,9 +212,7 @@ class Guitar_Factory:
         return regular_pay + overtime_pay
 
     def dispatch_guitars_control(self, env):
-        """
-        Function to control the dispatch of guitars.
-        """
+        """Function to control the dispatch of guitars."""
         yield env.timeout(0)
         while True:
             if self.dispatch.level >= self.dispatch_threshold:
@@ -218,11 +227,10 @@ class Guitar_Factory:
                 guitars_sold = self.dispatch.level
                 revenue = guitars_sold * self.costs['guitar_sale_price']
                 self.finances['total_revenue'] += revenue
-                self.finances['material_costs'] += self.costs['dispatch_cost']  # Add dispatch cost
-                self.log(f'Revenue from sale: ${revenue:,.2f}')
-                self.log(f'Dispatch cost: ${self.costs["dispatch_cost"]:,.2f}')
+                self.finances['material_costs'] += self.costs['dispatch_cost']
                 
-                self.guitars_made += self.dispatch.level
+                # Don't reset guitars_made, just add to it
+                self.guitars_made += guitars_sold
                 yield self.dispatch.get(self.dispatch.level)
                 self.log('----------------------------------')
                 yield env.timeout(8)
@@ -401,13 +409,18 @@ def assembler(env, factory, worker_id):
             factory.finances['idle_costs'] += idle_time * factory.costs['hourly_wages']['assembler']
 
 class GuitarFactorySimulation:
-    def __init__(self, hours=8, days=23, num_body=2, num_neck=1, num_paint=3, num_ensam=2, dispatch_threshold=50):
-        """
-        Initialize the simulation.
-        """
+    def __init__(self, hours=8, days=5, num_body=2, num_neck=1, num_paint=3, num_ensam=2, 
+                 dispatch_threshold=50, total_demand=200, current_week=1):
         self.hours = hours
-        self.days = days
+        self.days = days  # Changed to 5 days per week
         self.total_time = hours * days
+        self.total_demand = total_demand
+        self.current_week = current_week
+        self.weekly_demand = total_demand / 4  # Split demand over 4 weeks
+        
+        # Track weekly production
+        self.total_production = 0
+        self.weekly_production = 0
         
         # Store all parameters as instance variables
         self.num_body = num_body
@@ -447,55 +460,63 @@ class GuitarFactorySimulation:
             'dispatch_threshold': dispatch_threshold,
         }
 
-    def run_simulation(self):
-        """
-        Run the simulation.
-        """
-        env = simpy.Environment()
-        self.guitar_factory = Guitar_Factory(env, self.params)
+        # Create the factory once and keep it for the entire game
+        self.env = simpy.Environment()
+        self.guitar_factory = Guitar_Factory(self.env, self.params)
 
-        # Modify process generators to only create processes for available workers
-        def body_maker_gen(env, factory):
-            while True:
-                # Wait until start of day
-                next_day = (int(env.now / self.params['hours']) + 1) * self.params['hours']
-                yield env.timeout(next_day - env.now)
-                
-                # Start processes only for available workers
-                for worker_id in factory.available_workers['body_makers']:
-                    env.process(body_maker(env, factory, worker_id))
+    def update_params(self, new_params):
+        """Update parameters between weeks"""
+        # Update worker counts
+        self.guitar_factory.total_workers = {
+            'body_makers': new_params.get('num_body', self.num_body),
+            'neck_makers': new_params.get('num_neck', self.num_neck),
+            'painters': new_params.get('num_paint', self.num_paint),
+            'assemblers': new_params.get('num_ensam', self.num_ensam)
+        }
+        # Update dispatch threshold
+        self.guitar_factory.dispatch_threshold = new_params.get('dispatch_threshold', self.params['dispatch_threshold'])
+        
+        # Update internal params
+        self.params.update(new_params)
 
-        def neck_maker_gen(env, factory):
-            while True:
-                next_day = (int(env.now / self.params['hours']) + 1) * self.params['hours']
-                yield env.timeout(next_day - env.now)
-                for worker_id in factory.available_workers['neck_makers']:
-                    env.process(neck_maker(env, factory, worker_id))
+    def calculate_weekly_financials(self, weekly_production):
+        """Calculate financial results including demand penalties"""
+        weekly_demand = self.weekly_demand
+        overproduction = max(0, weekly_production - weekly_demand)
+        
+        # Update total production
+        self.total_production += weekly_production
+        
+        # Only calculate demand penalty in final week AND only if total production is less than demand
+        demand_penalty = 0
+        if self.current_week == 4:
+            if self.total_production < self.total_demand:
+                total_underproduction = self.total_demand - self.total_production
+                demand_penalty = total_underproduction * (self.guitar_factory.costs['guitar_sale_price'] * 0.5)
+        
+        # Calculate labor costs
+        weekly_hours = self.hours * self.days
+        labor_costs = 0
+        labor_costs += self.num_body * self.guitar_factory.calculate_worker_pay(weekly_hours, 'body_maker')
+        labor_costs += self.num_neck * self.guitar_factory.calculate_worker_pay(weekly_hours, 'neck_maker')
+        labor_costs += self.num_paint * self.guitar_factory.calculate_worker_pay(weekly_hours, 'painter')
+        labor_costs += self.num_ensam * self.guitar_factory.calculate_worker_pay(weekly_hours, 'assembler')
+        
+        # Calculate fixed costs
+        fixed_costs = self.guitar_factory.costs['daily_fixed_costs'] * self.days
 
-        def painter_maker_gen(env, factory):
-            while True:
-                next_day = (int(env.now / self.params['hours']) + 1) * self.params['hours']
-                yield env.timeout(next_day - env.now)
-                for worker_id in factory.available_workers['painters']:
-                    env.process(painter(env, factory, worker_id))
+        # Update finances
+        self.guitar_factory.finances['labor_costs'] = labor_costs
+        self.guitar_factory.finances['fixed_costs'] = fixed_costs
+        self.guitar_factory.finances['demand_penalty'] = demand_penalty
+        
+        remaining_demand = self.total_demand - self.total_production
+        
+        return overproduction, demand_penalty, remaining_demand
 
-        def assembler_maker_gen(env, factory):
-            while True:
-                next_day = (int(env.now / self.params['hours']) + 1) * self.params['hours']
-                yield env.timeout(next_day - env.now)
-                for worker_id in factory.available_workers['assemblers']:
-                    env.process(assembler(env, factory, worker_id))
-
-        # Start processes
-        env.process(body_maker_gen(env, self.guitar_factory))
-        env.process(neck_maker_gen(env, self.guitar_factory))
-        env.process(painter_maker_gen(env, self.guitar_factory))
-        env.process(assembler_maker_gen(env, self.guitar_factory))
-
-        # Run simulation
-        env.run(until=self.total_time)
-
-        final_state = {
+    def get_final_state(self):
+        """Get the final state of all storage containers"""
+        return {
             'wood_level': self.guitar_factory.wood.level,
             'electronic_level': self.guitar_factory.electronic.level,
             'body_pre_paint': self.guitar_factory.body_pre_paint.level,
@@ -506,38 +527,99 @@ class GuitarFactorySimulation:
             'total_guitars': self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level
         }
 
-        # Calculate final financial results
-        weekly_hours = self.hours * 5  # Assuming 5-day work week
-        total_weeks = self.days / 5
-
-        # Calculate labor costs
-        labor_costs = 0
-        labor_costs += self.num_body * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'body_maker')
-        labor_costs += self.num_neck * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'neck_maker')
-        labor_costs += self.num_paint * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'painter')
-        labor_costs += self.num_ensam * self.guitar_factory.calculate_worker_pay(weekly_hours * total_weeks, 'assembler')
-
-        fixed_costs = self.guitar_factory.costs['daily_fixed_costs'] * self.days
-
-        # Material costs are now tracked in real-time, just need to update the finances
-        self.guitar_factory.finances['fixed_costs'] = fixed_costs
-        self.guitar_factory.finances['labor_costs'] = labor_costs
-        self.guitar_factory.finances['profit'] = (self.guitar_factory.finances['total_revenue'] - 
-                                                labor_costs - 
-                                                self.guitar_factory.finances['material_costs'] - 
-                                                fixed_costs)  # Removed idle_costs from profit calculation
-
-        return SimulationResult(
-            guitars_made=self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level,
+    def run_weekly_simulation(self):
+        """Run simulation for one week"""
+        # Store starting guitar count for this week
+        start_guitars = self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level
+        
+        # Store current container levels
+        old_levels = {
+            'wood': self.guitar_factory.wood.level,
+            'electronic': self.guitar_factory.electronic.level,
+            'body_pre_paint': self.guitar_factory.body_pre_paint.level,
+            'neck_pre_paint': self.guitar_factory.neck_pre_paint.level,
+            'body_post_paint': self.guitar_factory.body_post_paint.level,
+            'neck_post_paint': self.guitar_factory.neck_post_paint.level,
+            'dispatch': self.guitar_factory.dispatch.level
+        }
+        
+        # Clear logs for new week but keep everything else
+        self.guitar_factory.logs = []
+        
+        # Create new environment
+        self.env = simpy.Environment()
+        
+        # Recreate containers with preserved levels
+        self.guitar_factory.wood = simpy.Container(self.env, capacity=self.params['wood_capacity'], 
+                                                 init=old_levels['wood'])
+        self.guitar_factory.electronic = simpy.Container(self.env, capacity=self.params['electronic_capacity'], 
+                                                   init=old_levels['electronic'])
+        self.guitar_factory.body_pre_paint = simpy.Container(self.env, capacity=self.params['body_pre_paint_capacity'], 
+                                                            init=old_levels['body_pre_paint'])
+        self.guitar_factory.neck_pre_paint = simpy.Container(self.env, capacity=self.params['neck_pre_paint_capacity'], 
+                                                            init=old_levels['neck_pre_paint'])
+        self.guitar_factory.body_post_paint = simpy.Container(self.env, capacity=self.params['body_post_paint_capacity'], 
+                                                             init=old_levels['body_post_paint'])
+        self.guitar_factory.neck_post_paint = simpy.Container(self.env, capacity=self.params['neck_post_paint_capacity'], 
+                                                             init=old_levels['neck_post_paint'])
+        self.guitar_factory.dispatch = simpy.Container(self.env, capacity=self.params['dispatch_capacity'], 
+                                                     init=old_levels['dispatch'])
+        
+        # Initialize control processes
+        self.guitar_factory.wood_control = self.env.process(
+            self.guitar_factory.wood_stock_control(self.env, self.params['wood_critical_stock']))
+        self.guitar_factory.electronic_control = self.env.process(
+            self.guitar_factory.electronic_stock_control(self.env))
+        self.guitar_factory.dispatch_control = self.env.process(
+            self.guitar_factory.dispatch_guitars_control(self.env))
+        self.guitar_factory.worker_control = self.env.process(
+            self.guitar_factory.update_worker_availability(self.env))
+        
+        # Initialize workers
+        def initialize_workers(env, factory):
+            for worker_id in range(factory.total_workers['body_makers']):
+                if random.random() > SICK_DAY_PROBABILITY:
+                    factory.available_workers['body_makers'].append(worker_id)
+                    env.process(body_maker(env, factory, worker_id))
+            for worker_id in range(factory.total_workers['neck_makers']):
+                if random.random() > SICK_DAY_PROBABILITY:
+                    factory.available_workers['neck_makers'].append(worker_id)
+                    env.process(neck_maker(env, factory, worker_id))
+            for worker_id in range(factory.total_workers['painters']):
+                if random.random() > SICK_DAY_PROBABILITY:
+                    factory.available_workers['painters'].append(worker_id)
+                    env.process(painter(env, factory, worker_id))
+            for worker_id in range(factory.total_workers['assemblers']):
+                if random.random() > SICK_DAY_PROBABILITY:
+                    factory.available_workers['assemblers'].append(worker_id)
+                    env.process(assembler(env, factory, worker_id))
+        
+        initialize_workers(self.env, self.guitar_factory)
+        
+        # Run simulation
+        self.env.run(until=self.total_time)
+        
+        # Calculate weekly production
+        end_guitars = self.guitar_factory.guitars_made + self.guitar_factory.dispatch.level
+        weekly_production = end_guitars - start_guitars
+        
+        overproduction, demand_penalty, remaining_demand = self.calculate_weekly_financials(weekly_production)
+        
+        return WeeklyResult(
+            guitars_made=weekly_production,  # Return only this week's production
             logs=self.guitar_factory.logs,
-            final_state=final_state,
-            financial_results=self.guitar_factory.finances
+            final_state=self.get_final_state(),
+            financial_results=self.guitar_factory.finances,
+            week_number=self.current_week,
+            remaining_demand=remaining_demand,
+            overproduction=overproduction,
+            demand_penalty=demand_penalty
         )
 
 def run_factory_simulation(params: dict) -> SimulationResult:
     simulation = GuitarFactorySimulation(
         hours=params.get('hours', 8),
-        days=params.get('days', 23),
+        days=params.get('days', 5),
         num_body=params.get('num_body', 2),
         num_neck=params.get('num_neck', 1),
         num_paint=params.get('num_paint', 3),
