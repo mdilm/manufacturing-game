@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const GuitarFactoryDashboard = () => {
   const initialGameState = {
     currentWeek: 1,
@@ -53,7 +55,7 @@ const GuitarFactoryDashboard = () => {
   const runWeek = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/simulate_week', {
+      const response = await fetch(`${API_BASE_URL}/api/simulate_week`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
