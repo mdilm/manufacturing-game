@@ -93,7 +93,7 @@ class Guitar_Factory:
         self.costs = {
             'wood_per_unit': 50,  # $50 per wood unit
             'electronic_per_unit': 100,  # $100 per electronic unit
-            'guitar_sale_price': 600,  # $600 per guitar (reduced from $1000)
+            'guitar_sale_price': 800,  # $800 per guitar (increased from $600)
             'daily_fixed_costs': 2000, # $2000 per day fixed costs
             'dispatch_cost': 500,  # $500 per dispatch call
             'hourly_wages': {
@@ -143,8 +143,8 @@ class Guitar_Factory:
                 self.log('wood supplier arrives at day {0}, hour {1}'.format(
                     current_day, current_hour))
                 
-                # Add wood purchase cost when buying wood
-                wood_purchase = 300
+                # Use configured order size
+                wood_purchase = self.params['wood_order_size']
                 purchase_cost = wood_purchase * self.costs['wood_per_unit']
                 self.finances['material_costs'] += purchase_cost
                 self.log(f'Purchased {wood_purchase} wood units for ${purchase_cost:,.2f}')
@@ -163,7 +163,7 @@ class Guitar_Factory:
         """
         yield env.timeout(0)
         while True:
-            if self.electronic.level <= 30:
+            if self.electronic.level <= self.params['electronic_critical_level']:
                 current_day = int(env.now/self.hours_per_day)
                 current_hour = env.now % self.hours_per_day
                 self.log(f'electronic stock below critical level ({self.electronic.level}) at day {current_day}, hour {current_hour}')
@@ -173,8 +173,8 @@ class Guitar_Factory:
                 self.log('electronic supplier arrives at day {0}, hour {1}'.format(
                     current_day, current_hour))
                 
-                # Add electronic purchase cost when buying electronics
-                electronic_purchase = 30
+                # Use configured order size
+                electronic_purchase = self.params['electronic_order_size']
                 purchase_cost = electronic_purchase * self.costs['electronic_per_unit']
                 self.finances['material_costs'] += purchase_cost
                 self.log(f'Purchased {electronic_purchase} electronic units for ${purchase_cost:,.2f}')
@@ -415,18 +415,30 @@ class GuitarFactorySimulation:
         self.num_paint = num_paint
         self.num_ensam = num_ensam
         
-        # Parameters
+        # Calculate material requirements based on staffing
+        hourly_wood_usage = (num_body * 2) + num_neck  # Each body maker uses 2, each neck maker uses 1
+        hourly_electronic_usage = num_ensam  # Each assembler uses 1
+
+        # Set order quantities and critical levels based on usage
+        wood_order_size = int(hourly_wood_usage * hours * 3)  # 3 days worth of wood
+        electronic_order_size = int(hourly_electronic_usage * hours * 3)  # 3 days worth of electronics
+        wood_critical_level = int(hourly_wood_usage * hours * 2)  # 2 days worth of wood
+        electronic_critical_level = int(hourly_electronic_usage * hours * 2)  # 2 days worth of electronics
+
         self.params = {
-            'wood_capacity': 500,
-            'initial_wood': 200,
-            'electronic_capacity': 100,
-            'initial_electronic': 60,
+            'wood_capacity': 1000,
+            'initial_wood': wood_order_size,
+            'electronic_capacity': 500,
+            'initial_electronic': electronic_order_size,
             'body_pre_paint_capacity': 60,
             'neck_pre_paint_capacity': 60,
             'body_post_paint_capacity': 120,
             'neck_post_paint_capacity': 120,
             'dispatch_capacity': 500,
-            'wood_critical_stock': ((8/1) * num_body + (8/1) * num_neck) * 3,
+            'wood_critical_stock': wood_critical_level,
+            'electronic_critical_level': electronic_critical_level,
+            'wood_order_size': wood_order_size,
+            'electronic_order_size': electronic_order_size,
             'num_body': num_body,
             'num_neck': num_neck,
             'num_paint': num_paint,
