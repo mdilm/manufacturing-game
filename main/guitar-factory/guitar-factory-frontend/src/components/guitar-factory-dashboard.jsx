@@ -30,7 +30,7 @@ const GuitarFactoryDashboard = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showFinalModal, setShowFinalModal] = useState(false);
 
@@ -55,16 +55,30 @@ const GuitarFactoryDashboard = () => {
   const runWeek = async () => {
     setLoading(true);
     try {
+      console.log('Attempting to connect to:', `${API_BASE_URL}/api/simulate_week`);
+      console.log('Sending params:', {
+        ...params,
+        current_week: gameState.currentWeek
+      });
+
       const response = await fetch(`${API_BASE_URL}/api/simulate_week`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           ...params,
           current_week: gameState.currentWeek
         })
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const weekResult = await response.json();
+      console.log('Received result:', weekResult);
       
       setGameState(prev => ({
         ...prev,
@@ -77,6 +91,8 @@ const GuitarFactoryDashboard = () => {
       setResults(weekResult);
     } catch (error) {
       console.error('Week simulation failed:', error);
+      // Add user-visible error message
+      alert(`Failed to run simulation: ${error.message}. Check console for details.`);
     } finally {
       setLoading(false);
     }
