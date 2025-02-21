@@ -158,7 +158,7 @@ const GuitarFactoryDashboard = () => {
                 <div className="cost-item">
                   <h3>Revenue</h3>
                   <ul>
-                    <li>Each guitar sells for: $600</li>
+                    <li>Each guitar sells for: $800</li>
                     <li>Guitars are picked up in batches of 50</li>
                   </ul>
                 </div>
@@ -396,12 +396,28 @@ const GuitarFactoryDashboard = () => {
         </div>
       )}
       <style jsx>{`
+        :global(body) {
+          margin: 0;
+          padding: 0;
+          min-height: 100vh;
+          background-color: ${darkMode ? '#1a1a1a' : '#ffffff'};
+          transition: background-color 0.3s ease;
+        }
+
+        :global(#root) {
+          min-height: 100vh;
+        }
+
         .container {
-          max-width: 1200px;
+          min-height: 100vh;
+          width: 100%;
+          max-width: 1400px;
           margin: 0 auto;
           padding: 20px;
+          background-color: ${darkMode ? '#1a1a1a' : '#ffffff'};
+          transition: all 0.3s ease;
         }
-        
+
         .introduction {
           background: white;
           padding: 20px;
@@ -672,6 +688,14 @@ const GuitarFactoryDashboard = () => {
           font-weight: bold;
           color: #3b82f6;
           margin: 0;
+        }
+
+        @media (min-width: 1400px) {
+          .container {
+            padding: 40px;
+            border-left: 1px solid ${darkMode ? '#333' : '#eee'};
+            border-right: 1px solid ${darkMode ? '#333' : '#eee'};
+          }
         }
 
         @media (max-width: 768px) {
