@@ -268,18 +268,21 @@ const GuitarFactoryDashboard = () => {
                   <p>92% average pass rate</p>
                   <p>Failed parts are scrapped</p>
                   <p>Materials cost lost on failure</p>
+                  <p>Each Maker has a wage of $25/hour</p>
                 </div>
                 <div className="process-step">
                   <h3>Painting</h3>
                   <p>85% average pass rate</p>
                   <p>Failed parts are repainted</p>
                   <p>Additional time and labor cost</p>
+                  <p>Each Maker has a wage of $23/hour</p>
                 </div>
                 <div className="process-step">
                   <h3>Assembly</h3>
                   <p>98% average pass rate</p>
                   <p>Failed assemblies are scrapped</p>
                   <p>All materials lost on failure</p>
+                  <p>Each Maker has a wage of $30/hour</p>
                 </div>
               </div>
             </div>
@@ -437,38 +440,87 @@ const GuitarFactoryDashboard = () => {
             <div className="financial-results">
               <h3>Financial Summary</h3>
               <div className="financial-grid">
-                <div>
-                  <label>Total Revenue:</label>
-                  <p>${results.financial_results.total_revenue?.toLocaleString()}</p>
+                <div className="weekly-section">
+                  <h4>Week {results.week_number} Results</h4>
+                  <div>
+                    <label>Weekly Revenue:</label>
+                    <p>${results.financial_results.total_revenue?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label>Weekly Labor Costs:</label>
+                    <p>${results.financial_results.labor_costs?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label>Weekly Material Costs:</label>
+                    <p>${results.financial_results.material_costs?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label>Weekly Fixed Costs:</label>
+                    <p>${results.financial_results.fixed_costs?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label>Weekly Employee Idle Costs:</label>
+                    <p>${results.financial_results.idle_costs?.toLocaleString()}</p>
+                    <p className="cost-note">(Opportunity cost - not included in profit)</p>
+                  </div>
+                  <div>
+                    <label>Weekly Net Profit:</label>
+                    {(() => {
+                      const profit = results.financial_results.total_revenue - 
+                                   results.financial_results.labor_costs - 
+                                   results.financial_results.material_costs - 
+                                   results.financial_results.fixed_costs;
+                      return (
+                        <p style={{color: profit >= 0 ? 'green' : 'red'}}>
+                          ${profit.toLocaleString()}
+                        </p>
+                      );
+                    })()}
+                  </div>
                 </div>
-                <div>
-                  <label>Labor Costs:</label>
-                  <p>${results.financial_results.labor_costs?.toLocaleString()}</p>
-                </div>
-                <div>
-                  <label>Material Costs:</label>
-                  <p>${results.financial_results.material_costs?.toLocaleString()}</p>
-                </div>
-                <div>
-                  <label>Fixed Costs:</label>
-                  <p>${results.financial_results.fixed_costs?.toLocaleString()}</p>
-                </div>
-                <div>
-                  <label>Employee Idle Costs:</label>
-                  <p>${results.financial_results.idle_costs?.toLocaleString()}</p>
-                  <p className="cost-note">(Opportunity cost - not included in profit)</p>
-                </div>
-                <div>
-                  <label>Net Profit:</label>
+
+                <div className="cumulative-section">
+                  <h4>Cumulative Results</h4>
                   {(() => {
-                    const profit = results.financial_results.total_revenue - 
-                                 results.financial_results.labor_costs - 
-                                 results.financial_results.material_costs - 
-                                 results.financial_results.fixed_costs;
+                    const totals = calculateTotalResults();
                     return (
-                      <p style={{color: profit >= 0 ? 'green' : 'red'}}>
-                        ${profit.toLocaleString()}
-                      </p>
+                      <>
+                        <div>
+                          <label>Total Revenue:</label>
+                          <p>${totals.total_revenue.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <label>Total Labor Costs:</label>
+                          <p>${totals.labor_costs.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <label>Total Material Costs:</label>
+                          <p>${totals.material_costs.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <label>Total Fixed Costs:</label>
+                          <p>${totals.fixed_costs.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <label>Total Employee Idle Costs:</label>
+                          <p>${totals.idle_costs.toLocaleString()}</p>
+                          <p className="cost-note">(Opportunity cost - not included in profit)</p>
+                        </div>
+                        <div>
+                          <label>Total Net Profit:</label>
+                          {(() => {
+                            const totalProfit = totals.total_revenue - 
+                                              totals.labor_costs - 
+                                              totals.material_costs - 
+                                              totals.fixed_costs;
+                            return (
+                              <p style={{color: totalProfit >= 0 ? 'green' : 'red'}}>
+                                ${totalProfit.toLocaleString()}
+                              </p>
+                            );
+                          })()}
+                        </div>
+                      </>
                     );
                   })()}
                 </div>
@@ -536,6 +588,28 @@ const GuitarFactoryDashboard = () => {
                     <p>Weekly Target: {gameState.totalDemand / 4}</p>
                     {week.overproduction > 0 && (
                       <p>Overproduction: {week.overproduction}</p>
+                    )}
+                    {week.logs && (
+                      <div className="sick-days-summary">
+                        <h4>Employee Attendance</h4>
+                        {(() => {
+                          const sickDays = week.logs.filter(log => log.includes('called in sick'));
+                          if (sickDays.length > 0) {
+                            return (
+                              <>
+                                <p className="sick-days-count">{sickDays.length} employees called in sick</p>
+                                <div className="sick-days-details">
+                                  {sickDays.map((log, idx) => (
+                                    <p key={idx} className="sick-day-entry">{log}</p>
+                                  ))}
+                                </div>
+                              </>
+                            );
+                          } else {
+                            return <p className="no-sick-days">No employees called in sick this week</p>;
+                          }
+                        })()}
+                      </div>
                     )}
                   </div>
                   <div className="financial-metrics">
@@ -861,10 +935,10 @@ const GuitarFactoryDashboard = () => {
         .financial-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
+          gap: 20px;
           margin: 16px 0;
           padding: 16px;
-          background: #f8f9fa;
+          background: ${darkMode ? '#2d2d2d' : '#f8f9fa'};
           border-radius: 8px;
         }
 
@@ -1216,6 +1290,75 @@ const GuitarFactoryDashboard = () => {
 
         .mechanics-step li {
           margin: 8px 0;
+        }
+
+        .weekly-section, .cumulative-section {
+          background: ${darkMode ? '#222' : '#f8f9fa'};
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 15px;
+        }
+
+        .weekly-section h4, .cumulative-section h4 {
+          color: ${darkMode ? '#e5e5e5' : '#2563eb'};
+          margin-bottom: 15px;
+          border-bottom: 1px solid ${darkMode ? '#444' : '#ddd'};
+          padding-bottom: 8px;
+        }
+
+        .financial-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+          margin: 16px 0;
+          padding: 16px;
+          background: ${darkMode ? '#2d2d2d' : '#f8f9fa'};
+          border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+          .financial-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .sick-days-summary {
+          margin-top: 15px;
+          padding: 10px;
+          background: ${darkMode ? '#333' : '#f0f0f0'};
+          border-radius: 6px;
+        }
+
+        .sick-days-summary h4 {
+          color: ${darkMode ? '#e5e5e5' : '#2563eb'};
+          margin-bottom: 10px;
+        }
+
+        .sick-days-count {
+          font-weight: bold;
+          color: ${darkMode ? '#ff6b6b' : '#dc2626'};
+        }
+
+        .sick-days-details {
+          margin-top: 8px;
+          font-size: 0.9em;
+        }
+
+        .sick-day-entry {
+          margin: 4px 0;
+          padding-left: 15px;
+          position: relative;
+        }
+
+        .sick-day-entry:before {
+          content: "🤒";
+          position: absolute;
+          left: 0;
+        }
+
+        .no-sick-days {
+          color: ${darkMode ? '#4ade80' : '#16a34a'};
+          font-style: italic;
         }
       `}</style>
     </div>

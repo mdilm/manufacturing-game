@@ -110,8 +110,8 @@ class Guitar_Factory:
             'hourly_wages': {
                 'body_maker': 25,
                 'neck_maker': 25,
-                'painter': 30,
-                'assembler': 28
+                'painter': 23,
+                'assembler': 30
             },
             'overtime_multiplier': 1.5  # 1.5x pay for overtime
         }
@@ -291,7 +291,6 @@ def body_maker(env, factory, worker_id):
 
         if quality_check('body'):
             yield factory.body_pre_paint.put(1)
-            factory.log(f'Body maker {worker_id+1} completed in {process_time:.2f} hours')
         else:
             factory.log(f'Body maker {worker_id+1} failed quality check - Materials scrapped')
             factory.finances['material_costs'] += 2 * factory.costs['wood_per_unit']
@@ -317,7 +316,6 @@ def neck_maker(env, factory, worker_id):
 
         if quality_check('neck'):
             yield factory.neck_pre_paint.put(1)
-            factory.log(f'Neck maker {worker_id+1} completed in {process_time:.2f} hours')
         else:
             factory.log(f'Neck maker {worker_id+1} failed quality check - Materials scrapped')
             factory.finances['material_costs'] += factory.costs['wood_per_unit']
@@ -350,7 +348,6 @@ def painter(env, factory, worker_id):
             if body_quality and neck_quality:
                 yield factory.body_post_paint.put(1)
                 yield factory.neck_post_paint.put(1)
-                factory.log(f'Painter {worker_id+1} completed in {process_time:.2f} hours')
             else:
                 if not body_quality:
                     yield factory.body_pre_paint.put(1)
@@ -394,7 +391,6 @@ def assembler(env, factory, worker_id):
 
             if quality_check('assembly'):
                 yield factory.dispatch.put(1)
-                factory.log(f'Assembler {worker_id+1} completed in {process_time:.2f} hours')
             else:
                 factory.log(f'Assembler {worker_id+1} failed quality check - Materials scrapped')
                 factory.finances['material_costs'] += (
@@ -497,10 +493,22 @@ class GuitarFactorySimulation:
         # Calculate labor costs
         weekly_hours = self.hours * self.days
         labor_costs = 0
-        labor_costs += self.num_body * self.guitar_factory.calculate_worker_pay(weekly_hours, 'body_maker')
-        labor_costs += self.num_neck * self.guitar_factory.calculate_worker_pay(weekly_hours, 'neck_maker')
-        labor_costs += self.num_paint * self.guitar_factory.calculate_worker_pay(weekly_hours, 'painter')
-        labor_costs += self.num_ensam * self.guitar_factory.calculate_worker_pay(weekly_hours, 'assembler')
+        
+        # Calculate regular pay for available workers (including overtime if applicable)
+        for worker_type, available in self.guitar_factory.available_workers.items():
+            role = worker_type[:-1]  # Remove 's' from end to get role name
+            labor_costs += len(available) * self.guitar_factory.calculate_worker_pay(weekly_hours, role)
+        
+        # Calculate sick pay (50% of regular pay only, no overtime) for absent workers
+        for worker_type, total in self.guitar_factory.total_workers.items():
+            role = worker_type[:-1]  # Remove 's' from end to get role name
+            absent_workers = total - len(self.guitar_factory.available_workers[worker_type])
+            if absent_workers > 0:
+                # For sick pay, only use regular hours (40) and regular rate
+                regular_hours = min(40, weekly_hours)
+                base_rate = self.guitar_factory.costs['hourly_wages'][role]
+                sick_pay = (regular_hours * base_rate) * 0.5  # 50% of regular pay only
+                labor_costs += absent_workers * sick_pay
         
         # Calculate fixed costs
         fixed_costs = self.guitar_factory.costs['daily_fixed_costs'] * self.days
